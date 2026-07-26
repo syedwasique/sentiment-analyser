@@ -4,22 +4,94 @@ from src.inference import predict
 bp = Blueprint('analyze', __name__, url_prefix='/analyze')
 
 
-def _prob_to_level(prob: float) -> str:
-    """Converts a 0-1 class probability into a Low/Medium/High label for the UI."""
-    if prob >= 0.66:
+def _score_to_level(score: float) -> str:
+    """Converts a 0-1 composite score into a Low/Medium/High label for the UI."""
+    if score >= 0.60:
         return "High"
-    elif prob >= 0.33:
+    elif score >= 0.30:
         return "Medium"
     return "Low"
 
 
-def _emotion_to_sentiment(label: str) -> str:
+def _emotion_to_sentiment(label: str, hap_score: float = 0.0) -> str:
     """Coarse sentiment bucket derived from the psychological-state prediction."""
-    if label == "Happy/Positive":
+    if label == "Happy/Positive" or hap_score >= 0.45:
         return "Positive"
     if label == "Neutral":
         return "Neutral"
     return "Negative"  # Anxious/Stress or Depressed/Sad
+
+
+def _compute_depression_score(scores: dict, lex: dict, flags: dict) -> float:
+    """Multi-signal independent depression score (0-1).
+    Combines: model class probability + NRC sadness/negative lexicon + keyword flags.
+    """
+    model_signal   = scores.get("Depressed/Sad", 0.0) * 0.40
+    nrc_signal     = (lex.get("sadness", 0.0) * 0.6 + lex.get("negative", 0.0) * 0.2) * 0.25
+    keyword_signal = 0.0
+    if flags.get("has_ru_dep"):
+        keyword_signal += 0.35
+    if flags.get("has_negation_of_positive"):
+        keyword_signal += 0.20
+    if scores.get("Depressed/Sad", 0.0) > 0.35:
+        keyword_signal += 0.15
+    return min(0.95, model_signal + nrc_signal + keyword_signal)
+
+
+def _compute_anxiety_score(scores: dict, lex: dict, flags: dict) -> float:
+    """Multi-signal independent anxiety score (0-1).
+    Combines: model class probability + NRC fear/anticipation + keyword flags.
+    """
+    model_signal   = scores.get("Anxious/Stress", 0.0) * 0.30
+    nrc_signal     = (lex.get("fear", 0.0) * 0.9 + lex.get("anticipation", 0.0) * 0.3) * 0.30
+    keyword_signal = 0.0
+    if flags.get("has_explicit_anxiety"):
+        keyword_signal += 0.45
+    if flags.get("has_ru_anx"):
+        keyword_signal += 0.25
+    if flags.get("has_distress_term"):
+        keyword_signal += 0.15
+    return min(0.95, model_signal + nrc_signal + keyword_signal)
+
+
+def _compute_stress_score(scores: dict, lex: dict, flags: dict) -> float:
+    """Multi-signal independent stress/burnout score (0-1).
+    Combines: model class probability + NRC negative + burnout keyword flags.
+    """
+    model_signal   = scores.get("Anxious/Stress", 0.0) * 0.30
+    nrc_signal     = (lex.get("negative", 0.0) * 0.3 + lex.get("anger", 0.0) * 0.15) * 0.20
+    keyword_signal = 0.0
+    if flags.get("has_burnout_term"):
+        keyword_signal += 0.60
+    if flags.get("has_ru_anx"):
+        keyword_signal += 0.20
+    if flags.get("has_distress_term"):
+        keyword_signal += 0.12
+    return min(0.95, model_signal + nrc_signal + keyword_signal)
+
+
+def _compute_anger_score(anger_score: float, lex: dict, flags: dict) -> float:
+    """Multi-signal independent anger/hostility score (0-1)."""
+    keyword_signal = anger_score * 0.60
+    nrc_signal     = lex.get("anger", 0.0) * 0.40
+    if flags.get("has_anger_term"):
+        keyword_signal = max(keyword_signal, 0.55)
+    return min(1.0, keyword_signal + nrc_signal)
+
+
+def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "") -> float:
+    """Multi-signal independent happiness/positivity score (0-1)."""
+    import re
+    from textblob import TextBlob
+    tb_pol = TextBlob(text).sentiment.polarity if text else 0.0
+    pos_words = bool(re.search(r'\b(achieved|proud|talented|goal|fitness|milestone|consistency|excited|amazing|happy|great|wonderful|joy|love|success|successful|awesome|good|best|fantastic|win|winning|congrats|cheerful|difference)\b', text, re.IGNORECASE))
+
+    model_signal   = scores.get("Happy/Positive", 0.0) * 0.50
+    nrc_signal     = (lex.get("joy", 0.0) * 0.7 + lex.get("positive", 0.0) * 0.5) * 0.35
+    polarity_signal = max(0.0, tb_pol) * 0.60 if tb_pol > 0 else 0.0
+    keyword_signal = 0.45 if pos_words else 0.0
+
+    return min(1.0, model_signal + nrc_signal + polarity_signal + keyword_signal)
 
 
 @bp.route('', methods=['POST'])
@@ -34,43 +106,57 @@ def analyze_text():
     if "error" in result:
         return jsonify(result), 400
 
-    scores = result["all_scores"]
+    scores         = result["all_scores"]
     predicted_label = result["predicted_label"]
-    confidence = result["confidence"]
+    confidence     = result["confidence"]
+    lex            = result.get("lexicon_scores", {})
+    flags          = result.get("keyword_flags", {})
+    raw_anger      = result.get("anger_score", 0.0)
 
-    # NOTE: the model was trained on a single combined "Anxious/Stress" class,
-    # so anxiety and stress currently share the same underlying probability.
-    depression_prob = scores.get("Depressed/Sad", 0.0)
-    anxiety_stress_prob = scores.get("Anxious/Stress", 0.0)
+    # Each dimension is scored independently from multiple signals
+    dep_score = _compute_depression_score(scores, lex, flags)
+    anx_score = _compute_anxiety_score(scores, lex, flags)
+    str_score = _compute_stress_score(scores, lex, flags)
+    ang_score = _compute_anger_score(raw_anger, lex, flags)
+    hap_score = _compute_happiness_score(scores, lex, flags, text)
 
     psychological_states = {
-        "depression": _prob_to_level(depression_prob),
-        "anxiety": _prob_to_level(anxiety_stress_prob),
-        "stress": _prob_to_level(anxiety_stress_prob),
+        "depression": _score_to_level(dep_score),
+        "anxiety":    _score_to_level(anx_score),
+        "stress":     _score_to_level(str_score),
+        "anger":      _score_to_level(ang_score),
+        "happiness":  _score_to_level(hap_score),
     }
 
-    # Flag for early-awareness if the model is reasonably confident about a
-    # concerning state (Objective 2 territory, wired in now since the signal exists)
-    is_concerning = predicted_label in ("Anxious/Stress", "Depressed/Sad")
-    flagged = is_concerning and confidence >= 0.5
+    # For Happy/Positive posts without sarcasm: risk level is None and not flagged
+    is_positive_post = (predicted_label == "Happy/Positive" or hap_score >= 0.30) and not result.get("is_sarcastic", False)
 
-    if not is_concerning:
+    if is_positive_post:
         risk_level = "None"
-    elif confidence >= 0.75:
-        risk_level = "High"
-    elif confidence >= 0.5:
-        risk_level = "Medium"
+        flagged = False
     else:
-        risk_level = "Low"
+        max_dim_score = max(dep_score, anx_score, str_score, ang_score)
+        is_concerning = predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
+        flagged = is_concerning and (confidence >= 0.5 or max_dim_score >= 0.5)
+
+        if not is_concerning:
+            risk_level = "None"
+        elif confidence >= 0.75 or max_dim_score >= 0.70:
+            risk_level = "High"
+        elif confidence >= 0.5 or max_dim_score >= 0.45:
+            risk_level = "Medium"
+        else:
+            risk_level = "Low"
 
     response_data = {
         "text": text,
-        "sentiment": _emotion_to_sentiment(predicted_label),
-        "sentiment_score": confidence,
-        "predicted_label": predicted_label,
+        "sentiment": _emotion_to_sentiment(predicted_label, hap_score),
+        "sentiment_score": max(confidence, hap_score) if is_positive_post else confidence,
+        "predicted_label": "Happy/Positive" if is_positive_post else predicted_label,
         "all_scores": scores,
         "psychological_states": psychological_states,
         "flagged": flagged,
         "risk_level": risk_level,
+        "is_sarcastic": result.get("is_sarcastic", False),
     }
     return jsonify(response_data)
