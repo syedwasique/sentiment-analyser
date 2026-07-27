@@ -1,147 +1,351 @@
 {% extends 'base.html' %}
 
-{% block title %}MindPulse - Hybrid Sentiment & Mental Health Analysis{% endblock %}
+{% block title %}MindPulse — Social Media Psychological Diagnostics{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="welcome-section">
-        <h1>Social Media sentiment & Psychological Diagnostics</h1>
-        <p class="subtitle">Extract underlying emotional states, detect stress, anxiety, and depressive indicators, and flag early intervention needs using hybrid Deep Learning and Retrieval-Augmented Lexicons.</p>
+<!-- ── Hero Section ───────────────────────────────────── -->
+<section class="hero-section">
+    <div class="hero-badge">
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span>Hybrid Deep Learning + Retrieval-Augmented Lexicon</span>
     </div>
+    <h1 class="hero-title">
+        Psychological Diagnostics<br>
+        <span class="hero-gradient-text">for Social Media Text</span>
+    </h1>
+    <p class="hero-subtitle">
+        Analyze tweets, Reddit posts, and social messages using a fine-tuned RoBERTa model fused with NRC emotion lexicons.
+        Detect depression, anxiety, stress, anger, and sarcasm — including Roman Urdu.
+    </p>
+    <!-- Stat pills -->
+    <div class="hero-stats">
+        <div class="stat-pill">
+            <i class="fa-solid fa-layer-group"></i>
+            <span><strong>4</strong> Emotion Classes</span>
+        </div>
+        <div class="stat-pill">
+            <i class="fa-solid fa-flask"></i>
+            <span><strong>10</strong> Lexicon Dimensions</span>
+        </div>
+        <div class="stat-pill">
+            <i class="fa-solid fa-language"></i>
+            <span><strong>Bilingual</strong> EN + Roman Urdu</span>
+        </div>
+        <div class="stat-pill">
+            <i class="fa-solid fa-masks-theater"></i>
+            <span><strong>AI</strong> Sarcasm Detection</span>
+        </div>
+    </div>
+</section>
 
+<!-- ── Main Analysis Grid ─────────────────────────────── -->
+<section class="analysis-section" id="analysisTool">
     <div class="analysis-grid">
-        <!-- Input Panel -->
-        <div class="card input-card">
-            <div class="card-header">
-                <h2><i class="fa-solid fa-pen-nib"></i> Analyze Social Media Text</h2>
-                <span class="badge">Hybrid Lexicon-RoBERTa + RAG</span>
-            </div>
-            <div class="card-body">
-                <form id="analyze-form">
-                    <div class="textarea-wrapper">
-                        <textarea id="text-input" placeholder="Paste a tweet, reddit comment, or paragraph here... (e.g., 'Lately I've been feeling extremely overwhelmed and exhausted, like no matter what I do I can't catch up...')" required></textarea>
-                        <div class="char-count">0 / 500</div>
+
+        <!-- ── LEFT: Input Panel ── -->
+        <div class="panel input-panel" id="inputPanel">
+            <div class="panel-header">
+                <div class="panel-header-left">
+                    <div class="panel-icon-wrap icon-purple">
+                        <i class="fa-solid fa-pen-nib"></i>
                     </div>
+                    <div>
+                        <h2 class="panel-title">Analyze Text</h2>
+                        <p class="panel-subtitle">Paste any social media post or message</p>
+                    </div>
+                </div>
+                <div class="panel-badge badge-model">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>RoBERTa + NRC</span>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <form id="analyze-form" novalidate>
+                    <!-- Textarea -->
+                    <div class="textarea-wrapper">
+                        <textarea
+                            id="text-input"
+                            placeholder="e.g. 'Lately I've been feeling extremely overwhelmed and exhausted, like no matter what I do I can't catch up...'"
+                            maxlength="1000"
+                            aria-label="Text to analyze"
+                        ></textarea>
+                        <div class="textarea-footer">
+                            <span class="char-count" id="charCount">0 / 1000</span>
+                            <button type="button" class="clear-btn" id="clearBtn" aria-label="Clear text">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sample posts quick-pick -->
+                    <div class="sample-section">
+                        <span class="sample-label"><i class="fa-solid fa-bolt-lightning"></i> Quick Samples</span>
+                        <div class="sample-chips" id="sampleChips">
+                            <button type="button" class="sample-chip" data-sample="0">😔 Depressed</button>
+                            <button type="button" class="sample-chip" data-sample="1">😊 Happy</button>
+                            <button type="button" class="sample-chip" data-sample="2">😰 Anxious</button>
+                            <button type="button" class="sample-chip" data-sample="3">😤 Angry</button>
+                            <button type="button" class="sample-chip" data-sample="4">😏 Sarcastic</button>
+                            <button type="button" class="sample-chip" data-sample="5">🔥 Burnout</button>
+                        </div>
+                    </div>
+
+                    <!-- Submit actions -->
                     <div class="form-actions">
-                        <button type="button" id="load-sample-btn" class="btn btn-secondary">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Load Sample Post
+                        <button type="button" id="load-sample-btn" class="btn btn-ghost" aria-label="Load random sample">
+                            <i class="fa-solid fa-shuffle"></i>
+                            <span>Random Sample</span>
                         </button>
-                        <button type="submit" id="submit-btn" class="btn btn-primary">
-                            <span>Analyze Context</span> <i class="fa-solid fa-arrow-right"></i>
+                        <button type="submit" id="submit-btn" class="btn btn-primary" aria-label="Run analysis">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <span>Analyze</span>
+                            <div class="btn-ripple" id="btnRipple"></div>
                         </button>
                     </div>
                 </form>
             </div>
+
+            <!-- Model info card at bottom -->
+            <div class="model-info-card">
+                <div class="model-info-row">
+                    <div class="model-badge-sm">
+                        <i class="fa-solid fa-robot"></i>
+                        <span>cardiffnlp/twitter-roberta-base-sentiment</span>
+                    </div>
+                    <div class="model-badge-sm">
+                        <i class="fa-solid fa-masks-theater"></i>
+                        <span>twitter-roberta-base-irony</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Realtime Output Panel (Client-Side dynamic render or placeholder) -->
-        <div class="card result-card empty-state" id="result-display-card">
-            <div class="empty-state-content" id="empty-results-view">
-                <div class="icon-pulse">
-                    <i class="fa-solid fa-circle-nodes"></i>
+        <!-- ── RIGHT: Results Panel ── -->
+        <div class="panel result-panel" id="resultPanel">
+
+            <!-- Empty state -->
+            <div class="empty-state-wrapper" id="emptyState">
+                <div class="empty-icon-ring">
+                    <div class="empty-icon-inner">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <svg class="empty-ring-svg" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(139,92,246,0.15)" stroke-width="1.5" stroke-dasharray="4 4"/>
+                    </svg>
                 </div>
-                <h3>Awaiting Input</h3>
-                <p>Submit text to run sentiment scoring, psychological feature mapping, and expert RAG lookup.</p>
+                <h3 class="empty-title">Awaiting Input</h3>
+                <p class="empty-desc">Submit a social media post to run sentiment scoring, psychological feature mapping, and expert context lookup.</p>
+                <div class="empty-feature-list">
+                    <div class="empty-feature"><i class="fa-solid fa-check-circle"></i> Multi-label emotion detection</div>
+                    <div class="empty-feature"><i class="fa-solid fa-check-circle"></i> Real-time sarcasm & irony flags</div>
+                    <div class="empty-feature"><i class="fa-solid fa-check-circle"></i> Roman Urdu support</div>
+                    <div class="empty-feature"><i class="fa-solid fa-check-circle"></i> Expert-level risk assessment</div>
+                </div>
             </div>
-            
-            <!-- Result contents (hidden by default) -->
-            <div class="results-content hidden" id="results-view">
-                <div class="card-header">
-                    <h2><i class="fa-solid fa-square-poll-vertical"></i> Diagnostic Report</h2>
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <span class="badge hidden" id="sarcasm-badge" style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid #f59e0b;"><i class="fa-solid fa-masks-theater"></i> Sarcasm Detected</span>
-                        <span class="badge" id="risk-badge">Risk Level: Low</span>
+
+            <!-- Loading state -->
+            <div class="loading-state hidden" id="loadingState">
+                <div class="loader-wrap">
+                    <div class="neural-loader">
+                        <div class="n-ring n-ring-1"></div>
+                        <div class="n-ring n-ring-2"></div>
+                        <div class="n-ring n-ring-3"></div>
+                        <i class="fa-solid fa-brain loader-brain"></i>
+                    </div>
+                    <div class="loader-steps" id="loaderSteps">
+                        <div class="loader-step active" id="step1"><i class="fa-solid fa-check"></i> Cleaning &amp; Tokenizing</div>
+                        <div class="loader-step" id="step2"><i class="fa-regular fa-circle"></i> Running RoBERTa</div>
+                        <div class="loader-step" id="step3"><i class="fa-regular fa-circle"></i> Extracting Lexicon Features</div>
+                        <div class="loader-step" id="step4"><i class="fa-regular fa-circle"></i> Sarcasm &amp; Calibration</div>
+                        <div class="loader-step" id="step5"><i class="fa-regular fa-circle"></i> Generating Report</div>
                     </div>
                 </div>
-                
-                <!-- Flagged post warning banner -->
-                <div id="flagged-banner" class="warning-banner hidden">
-                    <div class="warning-banner-icon">
+            </div>
+
+            <!-- Results -->
+            <div class="results-wrapper hidden" id="resultsState">
+
+                <!-- Results Header -->
+                <div class="results-header">
+                    <div class="results-header-left">
+                        <div class="panel-icon-wrap icon-cyan">
+                            <i class="fa-solid fa-chart-bar"></i>
+                        </div>
+                        <div>
+                            <h2 class="panel-title">Diagnostic Report</h2>
+                            <p class="panel-subtitle" id="resultTimestamp">Just now</p>
+                        </div>
+                    </div>
+                    <div class="results-header-right">
+                        <span class="badge-pill hidden" id="sarcasmBadge">
+                            <i class="fa-solid fa-masks-theater"></i> Sarcasm Detected
+                        </span>
+                        <span class="risk-badge" id="riskBadge">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span id="riskLabel">Risk: None</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Flagged warning banner -->
+                <div class="alert-banner hidden" id="flaggedBanner" role="alert">
+                    <div class="alert-icon-wrap">
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </div>
-                    <div class="warning-banner-text">
-                        <h4>High Psychological Concern Detected</h4>
-                        <p>This text exhibits strong markers related to significant psychological distress. Early intervention review is recommended.</p>
+                    <div class="alert-content">
+                        <strong>High Psychological Concern Detected</strong>
+                        <p>This post exhibits strong markers of significant psychological distress. Consider early intervention or mental health resource referral.</p>
                     </div>
                 </div>
 
-                <div class="results-metrics">
-                    <!-- Sentiment Gauge -->
-                    <div class="metric-group">
-                        <h3>Overall Sentiment</h3>
-                        <div class="sentiment-indicator">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div class="sentiment-val" id="sentiment-val">Neutral</div>
-                                <span id="sarcasm-note" class="hidden" style="font-size: 0.8rem; color: #fbbf24; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.3);"><i class="fa-solid fa-masks-theater"></i> Sarcastic Phrase Detected</span>
-                            </div>
-                            <div class="sentiment-bar-bg">
-                                <div class="sentiment-bar-fill" id="sentiment-bar-fill" style="width: 50%;"></div>
-                            </div>
-                            <div class="sentiment-score-lbl">Score: <span id="sentiment-score-num">0.50</span></div>
+                <!-- Primary emotion card -->
+                <div class="primary-emotion-card" id="primaryEmotionCard">
+                    <div class="pe-left">
+                        <div class="pe-label-wrap">
+                            <span class="pe-class-label" id="peClassLabel">Analyzing...</span>
+                            <span class="pe-sentiment-tag" id="peSentimentTag">Neutral</span>
                         </div>
+                        <div class="pe-confidence-bar-wrap">
+                            <div class="pe-confidence-bar-bg">
+                                <div class="pe-confidence-bar-fill" id="peConfidenceFill" style="width: 0%"></div>
+                            </div>
+                            <span class="pe-confidence-num" id="peConfidenceNum">0%</span>
+                        </div>
+                        <span class="pe-sublabel">Model Confidence</span>
                     </div>
+                    <div class="pe-right">
+                        <canvas id="sentimentDonut" width="110" height="110"></canvas>
+                    </div>
+                </div>
 
-                    <!-- Psychological States -->
-                    <div class="metric-group">
-                        <h3>Psychological Diagnostics</h3>
-                        <div class="states-list">
-                            <div class="state-item">
-                                <span class="state-name">Depressive Indicators</span>
-                                <div class="state-progress">
-                                    <div class="state-progress-fill color-dep" id="state-dep-fill" style="width: 10%;"></div>
-                                </div>
-                                <span class="state-val" id="state-dep-val">Low</span>
-                            </div>
-                            <div class="state-item">
-                                <span class="state-name">Anxiety Indicators</span>
-                                <div class="state-progress">
-                                    <div class="state-progress-fill color-anx" id="state-anx-fill" style="width: 10%;"></div>
-                                </div>
-                                <span class="state-val" id="state-anx-val">Low</span>
-                            </div>
-                            <div class="state-item">
-                                <span class="state-name">Stress & Burnout</span>
-                                <div class="state-progress">
-                                    <div class="state-progress-fill color-str" id="state-str-fill" style="width: 10%;"></div>
-                                </div>
-                                <span class="state-val" id="state-str-val">Low</span>
-                            </div>
-                            <div class="state-item">
-                                <span class="state-name">Anger & Hostility</span>
-                                <div class="state-progress">
-                                    <div class="state-progress-fill color-ang" id="state-ang-fill" style="width: 10%;"></div>
-                                </div>
-                                <span class="state-val" id="state-ang-val">Low</span>
-                            </div>
-                            <div class="state-item">
-                                <span class="state-name">Happiness & Positivity</span>
-                                <div class="state-progress">
-                                    <div class="state-progress-fill color-hap" id="state-hap-fill" style="width: 10%;"></div>
-                                </div>
-                                <span class="state-val" id="state-hap-val">Low</span>
-                            </div>
+                <!-- Psychological state gauges -->
+                <div class="section-label"><i class="fa-solid fa-brain-circuit"></i> Psychological Indicators</div>
+                <div class="psych-grid" id="psychGrid">
+                    <div class="psych-card" id="pcDep">
+                        <div class="psych-card-header">
+                            <div class="psych-icon icon-dep"><i class="fa-solid fa-cloud-rain"></i></div>
+                            <span class="psych-name">Depression</span>
                         </div>
+                        <canvas class="psych-gauge" id="gaugeDep" width="80" height="80"></canvas>
+                        <span class="psych-level" id="lvlDep">Low</span>
+                    </div>
+                    <div class="psych-card" id="pcAnx">
+                        <div class="psych-card-header">
+                            <div class="psych-icon icon-anx"><i class="fa-solid fa-bolt"></i></div>
+                            <span class="psych-name">Anxiety</span>
+                        </div>
+                        <canvas class="psych-gauge" id="gaugeAnx" width="80" height="80"></canvas>
+                        <span class="psych-level" id="lvlAnx">Low</span>
+                    </div>
+                    <div class="psych-card" id="pcStr">
+                        <div class="psych-card-header">
+                            <div class="psych-icon icon-str"><i class="fa-solid fa-fire"></i></div>
+                            <span class="psych-name">Stress</span>
+                        </div>
+                        <canvas class="psych-gauge" id="gaugeStr" width="80" height="80"></canvas>
+                        <span class="psych-level" id="lvlStr">Low</span>
+                    </div>
+                    <div class="psych-card" id="pcAng">
+                        <div class="psych-card-header">
+                            <div class="psych-icon icon-ang"><i class="fa-solid fa-volcano"></i></div>
+                            <span class="psych-name">Anger</span>
+                        </div>
+                        <canvas class="psych-gauge" id="gaugeAng" width="80" height="80"></canvas>
+                        <span class="psych-level" id="lvlAng">Low</span>
+                    </div>
+                    <div class="psych-card" id="pcHap">
+                        <div class="psych-card-header">
+                            <div class="psych-icon icon-hap"><i class="fa-solid fa-face-smile-beam"></i></div>
+                            <span class="psych-name">Happiness</span>
+                        </div>
+                        <canvas class="psych-gauge" id="gaugeHap" width="80" height="80"></canvas>
+                        <span class="psych-level" id="lvlHap">Low</span>
                     </div>
                 </div>
-                
-                <div class="rag-context-section">
-                    <h3><i class="fa-solid fa-database"></i> Retrieved Expert Context (RAG)</h3>
-                    <div class="rag-text-box" id="rag-context-content">
-                        No RAG query initiated.
+
+                <!-- All class probabilities bar chart -->
+                <div class="section-label"><i class="fa-solid fa-chart-bar"></i> All Class Probabilities</div>
+                <div class="scores-breakdown" id="scoresBreakdown">
+                    <div class="score-row" id="scorRow0">
+                        <span class="score-row-label">Happy / Positive</span>
+                        <div class="score-row-bar-bg">
+                            <div class="score-row-fill score-fill-hap" id="scFill0" style="width:0%"></div>
+                        </div>
+                        <span class="score-row-num" id="scNum0">0%</span>
+                    </div>
+                    <div class="score-row" id="scorRow1">
+                        <span class="score-row-label">Neutral</span>
+                        <div class="score-row-bar-bg">
+                            <div class="score-row-fill score-fill-neu" id="scFill1" style="width:0%"></div>
+                        </div>
+                        <span class="score-row-num" id="scNum1">0%</span>
+                    </div>
+                    <div class="score-row" id="scorRow2">
+                        <span class="score-row-label">Anxious / Stress</span>
+                        <div class="score-row-bar-bg">
+                            <div class="score-row-fill score-fill-anx" id="scFill2" style="width:0%"></div>
+                        </div>
+                        <span class="score-row-num" id="scNum2">0%</span>
+                    </div>
+                    <div class="score-row" id="scorRow3">
+                        <span class="score-row-label">Depressed / Sad</span>
+                        <div class="score-row-bar-bg">
+                            <div class="score-row-fill score-fill-dep" id="scFill3" style="width:0%"></div>
+                        </div>
+                        <span class="score-row-num" id="scNum3">0%</span>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Loading indicator -->
-            <div class="loading-overlay hidden" id="loading-view">
-                <div class="spinner"></div>
-                <p>Running Hybrid Neural-Lexicon Pipeline...</p>
+
+                <!-- Analyzed text echo + keyword flags -->
+                <div class="analyzed-text-card" id="analyzedTextCard">
+                    <div class="analyzed-text-header">
+                        <i class="fa-solid fa-quote-left"></i>
+                        <span>Analyzed Text</span>
+                    </div>
+                    <p class="analyzed-text-content" id="analyzedTextContent"></p>
+                    <div class="keyword-flags" id="keywordFlags"></div>
+                </div>
+
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+</section>
 
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/analyze.js') }}"></script>
+<!-- ── How It Works ───────────────────────────────────── -->
+<section class="how-section">
+    <h2 class="section-heading">How MindPulse Works</h2>
+    <div class="how-grid">
+        <div class="how-card">
+            <div class="how-step">01</div>
+            <div class="how-icon"><i class="fa-solid fa-broom"></i></div>
+            <h3>Text Cleaning</h3>
+            <p>Removes URLs, mentions, and special characters. Handles both English and Roman Urdu normalization.</p>
+        </div>
+        <div class="how-card">
+            <div class="how-step">02</div>
+            <div class="how-icon"><i class="fa-solid fa-microchip-ai"></i></div>
+            <h3>RoBERTa Encoding</h3>
+            <p>Twitter-fine-tuned RoBERTa tokenizes and encodes the cleaned text into dense 768-dim contextualized embeddings.</p>
+        </div>
+        <div class="how-card">
+            <div class="how-step">03</div>
+            <div class="how-icon"><i class="fa-solid fa-list-check"></i></div>
+            <h3>NRC Lexicon Fusion</h3>
+            <p>10-dimensional affect scores from the NRC Word Emotion Lexicon are extracted with negation-aware context windows.</p>
+        </div>
+        <div class="how-card">
+            <div class="how-step">04</div>
+            <div class="how-icon"><i class="fa-solid fa-masks-theater"></i></div>
+            <h3>Sarcasm &amp; Calibration</h3>
+            <p>An AI irony classifier and regex pattern matching detect sarcasm and calibrate the final prediction accordingly.</p>
+        </div>
+        <div class="how-card">
+            <div class="how-step">05</div>
+            <div class="how-icon"><i class="fa-solid fa-shield-heart"></i></div>
+            <h3>Risk Assessment</h3>
+            <p>Multi-signal composite scores per psychological dimension produce a final risk level from Low → High.</p>
+        </div>
+    </div>
+</section>
 {% endblock %}

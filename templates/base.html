@@ -3,45 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Hybrid Sentiment & Psychological Analysis{% endblock %}</title>
-    <!-- Modern Typography: Outfit & Inter -->
+    <meta name="description" content="MindPulse — AI-powered hybrid RoBERTa + Lexicon sentiment & psychological analysis for social media text. Detect depression, anxiety, stress, and more in real time.">
+    <title>{% block title %}MindPulse — AI Psychological Analysis{% endblock %}</title>
+    <!-- Modern Typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Premium Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Main Style -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block head %}{% endblock %}
 </head>
 <body>
-    <div class="glass-bg-container">
-        <div class="glow-orb orb-1"></div>
-        <div class="glow-orb orb-2"></div>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="bg-orb orb-1"></div>
+        <div class="bg-orb orb-2"></div>
+        <div class="bg-orb orb-3"></div>
+        <div class="bg-grid"></div>
     </div>
-    
-    <header class="app-header">
-        <div class="header-container">
-            <div class="logo">
-                <i class="fa-solid fa-brain-circuit brain-icon"></i>
-                <span class="logo-text">Mind<span>Pulse</span></span>
+
+    <!-- Top Header / Navbar -->
+    <header class="app-header" id="appHeader">
+        <div class="header-inner">
+            <!-- Logo -->
+            <a href="{{ url_for('views.index') }}" class="logo" aria-label="MindPulse Home">
+                <div class="logo-icon-wrap">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="logo-text-wrap">
+                    <span class="logo-brand">Mind<span class="logo-accent">Pulse</span></span>
+                    <span class="logo-tagline">AI Psychological Analysis</span>
+                </div>
+            </a>
+
+            <!-- Center model chips -->
+            <div class="model-chips">
+                <div class="chip chip-model">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>RoBERTa-Large</span>
+                </div>
+                <div class="chip chip-lexicon">
+                    <i class="fa-solid fa-database"></i>
+                    <span>NRC Lexicon</span>
+                </div>
+                <div class="chip chip-rag">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>RAG Pipeline</span>
+                </div>
             </div>
-            <nav class="nav-links">
-                <a href="{{ url_for('views.index') }}" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-book-medical"></i> Documentation</a>
-                <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+
+            <!-- Nav links -->
+            <nav class="nav-links" aria-label="Main Navigation">
+                <a href="{{ url_for('views.index') }}" class="nav-item active" id="nav-dashboard">
+                    <i class="fa-solid fa-chart-mixed"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-docs">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Docs</span>
+                </a>
+                <a href="#" class="nav-item" id="nav-api">
+                    <i class="fa-solid fa-plug"></i>
+                    <span>API</span>
+                </a>
+                <div class="nav-divider"></div>
+                <div class="status-indicator" title="System Online">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Live</span>
+                </div>
             </nav>
         </div>
     </header>
 
+    <!-- Main -->
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
 
+    <!-- Footer -->
     <footer class="app-footer">
-        <p>&copy; 2026 MindPulse Systems. A Hybrid Lexicon-RoBERTa + RAG Solution for Social Media Psychological Analysis.</p>
+        <div class="footer-inner">
+            <div class="footer-left">
+                <div class="logo-icon-wrap footer-logo">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <span><strong>MindPulse</strong> — Hybrid Lexicon-RoBERTa + RAG System</span>
+            </div>
+            <div class="footer-right">
+                <span>Final Year Project &copy; 2026</span>
+                <span class="footer-sep">·</span>
+                <span>Multi-lingual · Roman Urdu + English</span>
+                <span class="footer-sep">·</span>
+                <span>Built with PyTorch + Flask</span>
+            </div>
+        </div>
     </footer>
 
     {% block scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/analyze.js') }}"></script>
 </body>
 </html>

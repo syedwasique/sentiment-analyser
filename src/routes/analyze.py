@@ -1,7 +1,18 @@
 from flask import Blueprint, request, jsonify
-from src.inference import predict
 
 bp = Blueprint('analyze', __name__, url_prefix='/analyze')
+
+# Lazy import — inference.py imports torch at the top level, which may not
+# be installed yet. We defer the import to request-time so Flask can still
+# start and serve the frontend even when PyTorch is missing.
+def _get_predict():
+    try:
+        from src.inference import predict
+        return predict
+    except ImportError as e:
+        return None
+    except Exception as e:
+        return None
 
 
 def _score_to_level(score: float) -> str:
@@ -101,6 +112,12 @@ def analyze_text():
     text = data.get('text', '')
     if not text:
         return jsonify({"error": "No text provided"}), 400
+
+    predict = _get_predict()
+    if predict is None:
+        return jsonify({
+            "error": "ML model not available. Please ensure PyTorch and Transformers are installed, then restart the server."
+        }), 503
 
     result = predict(text)
     if "error" in result:

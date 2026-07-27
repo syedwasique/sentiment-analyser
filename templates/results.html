@@ -1,65 +1,111 @@
 {% extends 'base.html' %}
 
-{% block title %}Analysis Results - MindPulse{% endblock %}
+{% block title %}Analysis Results — MindPulse{% endblock %}
 
 {% block content %}
-<div class="results-page-container">
-    <div class="card result-card">
-        <div class="card-header">
-            <h2><i class="fa-solid fa-square-poll-vertical"></i> Diagnostic Report</h2>
-            <span class="badge {{ 'risk-high' if result.flagged else 'risk-low' }}">Risk Level: {{ result.risk_level }}</span>
-        </div>
-        
-        {% if result.flagged %}
-        <div class="warning-banner">
-            <div class="warning-banner-icon">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-            </div>
-            <div class="warning-banner-text">
-                <h4>High Psychological Concern Detected</h4>
-                <p>This text exhibits strong markers related to significant psychological distress. Early intervention review is recommended.</p>
-            </div>
-        </div>
-        {% endif %}
+<section style="max-width: 760px; margin: 3rem auto; padding: 0 1rem;">
 
-        <div class="original-text-section">
-            <h3>Analyzed Text:</h3>
-            <blockquote class="analyzed-quote">"{{ result.text }}"</blockquote>
-        </div>
+    <!-- Back link -->
+    <a href="{{ url_for('views.index') }}" style="display:inline-flex;align-items:center;gap:.45rem;font-size:.85rem;font-weight:600;color:var(--text-3);margin-bottom:1.5rem;transition:color .2s;" onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-3)'">
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+    </a>
 
-        <div class="results-metrics">
-            <div class="metric-group">
-                <h3>Overall Sentiment</h3>
-                <div class="sentiment-indicator">
-                    <div class="sentiment-val">{{ result.sentiment }}</div>
-                    <div class="sentiment-bar-bg">
-                        <div class="sentiment-bar-fill" style="width: {{ result.sentiment_score * 100 }}%;"></div>
+    <div class="panel" style="padding: 0;">
+        <!-- Top accent -->
+        <div style="height:3px;background:var(--grad-brand);border-radius:var(--r-2xl) var(--r-2xl) 0 0;"></div>
+
+        <div style="padding: 1.75rem 2rem;">
+
+            <!-- Header -->
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:.85rem;">
+                    <div class="panel-icon-wrap icon-cyan">
+                        <i class="fa-solid fa-chart-bar"></i>
                     </div>
-                    <div class="sentiment-score-lbl">Score: {{ "%.2f"|format(result.sentiment_score) }}</div>
+                    <div>
+                        <h1 style="font-family:var(--font-display);font-size:1.3rem;font-weight:700;letter-spacing:-.3px;">Diagnostic Report</h1>
+                        <p style="font-size:.78rem;color:var(--text-3);margin-top:1px;">Hybrid RoBERTa + NRC Lexicon Analysis</p>
+                    </div>
+                </div>
+                <span class="risk-badge risk-{{ result.risk_level.lower() if result.risk_level else 'none' }}">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    Risk: {{ result.risk_level or 'None' }}
+                </span>
+            </div>
+
+            <!-- Flagged banner -->
+            {% if result.flagged %}
+            <div class="alert-banner" style="margin-bottom:1.5rem;">
+                <div class="alert-icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="alert-content">
+                    <strong>High Psychological Concern Detected</strong>
+                    <p>This text exhibits strong markers of significant psychological distress. Early intervention review is recommended.</p>
                 </div>
             </div>
+            {% endif %}
 
-            <div class="metric-group">
-                <h3>Psychological Diagnostics</h3>
-                <div class="states-list">
-                    {% for state, level in result.psychological_states.items() %}
-                    <div class="state-item">
-                        <span class="state-name">{{ state|capitalize }} Indicators</span>
-                        <div class="state-progress">
-                            {% set fill_pct = 10 %}
-                            {% if level == 'Medium' %}{% set fill_pct = 50 %}{% elif level == 'High' %}{% set fill_pct = 90 %}{% endif %}
-                            <div class="state-progress-fill color-{{ state[:3] }}" style="width: {{ fill_pct }}%;"></div>
+            <!-- Primary emotion -->
+            <div class="primary-emotion-card" style="margin-bottom:1.5rem;">
+                <div class="pe-left">
+                    <div class="pe-label-wrap">
+                        <span class="pe-class-label">{{ result.predicted_label }}</span>
+                        <span class="pe-sentiment-tag tag-{{ result.sentiment.lower() }}">{{ result.sentiment }}</span>
+                        {% if result.is_sarcastic %}
+                        <span class="badge-pill"><i class="fa-solid fa-masks-theater"></i> Sarcasm</span>
+                        {% endif %}
+                    </div>
+                    <div class="pe-confidence-bar-wrap">
+                        <div class="pe-confidence-bar-bg">
+                            <div class="pe-confidence-bar-fill" style="width:{{ (result.sentiment_score * 100)|round(1) }}%;"></div>
                         </div>
-                        <span class="state-val">{{ level }}</span>
+                        <span class="pe-confidence-num">{{ "%.1f"|format(result.sentiment_score * 100) }}%</span>
                     </div>
-                    {% endfor %}
+                    <span class="pe-sublabel">Model Confidence</span>
                 </div>
             </div>
-        </div>
-        
-        <div class="form-actions" style="margin-top: 30px;">
-            <a href="{{ url_for('views.index') }}" class="btn btn-primary"><i class="fa-solid fa-arrow-left"></i> Run Another Analysis</a>
+
+            <!-- Analyzed text -->
+            <div class="analyzed-text-card" style="margin-bottom:1.5rem;">
+                <div class="analyzed-text-header">
+                    <i class="fa-solid fa-quote-left"></i>
+                    <span>Analyzed Text</span>
+                </div>
+                <p class="analyzed-text-content">{{ result.text }}</p>
+            </div>
+
+            <!-- Psychological states -->
+            <div class="section-label" style="margin-bottom:.75rem;">
+                <i class="fa-solid fa-brain-circuit"></i> Psychological Indicators
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.75rem;">
+                {% for state, level in result.psychological_states.items() %}
+                {% set fill_pct = 12 %}
+                {% if level == 'Medium' %}{% set fill_pct = 52 %}{% elif level == 'High' %}{% set fill_pct = 90 %}{% endif %}
+                {% set col = '#8b5cf6' %}
+                {% if state == 'anxiety' %}{% set col = '#22d3ee' %}
+                {% elif state == 'stress' %}{% set col = '#f59e0b' %}
+                {% elif state == 'anger' %}{% set col = '#f43f5e' %}
+                {% elif state == 'happiness' %}{% set col = '#10b981' %}
+                {% endif %}
+                <div class="score-row">
+                    <span class="score-row-label">{{ state|capitalize }}</span>
+                    <div class="score-row-bar-bg">
+                        <div class="score-row-fill" style="width:{{ fill_pct }}%;background:{{ col }};"></div>
+                    </div>
+                    <span class="score-row-num" style="color:{% if level=='High' %}#f43f5e{% elif level=='Medium' %}#f59e0b{% else %}#10b981{% endif %};">{{ level }}</span>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                <a href="{{ url_for('views.index') }}" class="btn btn-primary" style="text-decoration:none;">
+                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                    Run Another Analysis
+                </a>
+            </div>
+
         </div>
     </div>
-</div>
+</section>
 {% endblock %}
