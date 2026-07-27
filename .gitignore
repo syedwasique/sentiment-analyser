@@ -11,6 +11,3 @@ models/rag_knowledge_base/*
 !models/rag_knowledge_base/.gitkeep
 config/config.ini
 project-brain/cache/
-best_hybrid_model.pt
-last_epoch_checkpoint.pt
-tokenizer/

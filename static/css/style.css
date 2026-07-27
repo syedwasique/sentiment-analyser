@@ -540,6 +540,8 @@ textarea:focus {
 .color-dep { background-color: var(--primary); }
 .color-anx { background-color: var(--secondary); }
 .color-str { background-color: var(--accent-warning); }
+.color-ang { background-color: #ef4444; }
+.color-hap { background-color: #10b981; }
 
 .state-val {
     font-size: 0.9rem;

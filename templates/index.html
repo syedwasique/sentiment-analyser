@@ -48,7 +48,10 @@
             <div class="results-content hidden" id="results-view">
                 <div class="card-header">
                     <h2><i class="fa-solid fa-square-poll-vertical"></i> Diagnostic Report</h2>
-                    <span class="badge" id="risk-badge">Risk Level: Low</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="badge hidden" id="sarcasm-badge" style="background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid #f59e0b;"><i class="fa-solid fa-masks-theater"></i> Sarcasm Detected</span>
+                        <span class="badge" id="risk-badge">Risk Level: Low</span>
+                    </div>
                 </div>
                 
                 <!-- Flagged post warning banner -->
@@ -67,7 +70,10 @@
                     <div class="metric-group">
                         <h3>Overall Sentiment</h3>
                         <div class="sentiment-indicator">
-                            <div class="sentiment-val" id="sentiment-val">Neutral</div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div class="sentiment-val" id="sentiment-val">Neutral</div>
+                                <span id="sarcasm-note" class="hidden" style="font-size: 0.8rem; color: #fbbf24; background: rgba(245, 158, 11, 0.15); padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(245, 158, 11, 0.3);"><i class="fa-solid fa-masks-theater"></i> Sarcastic Phrase Detected</span>
+                            </div>
                             <div class="sentiment-bar-bg">
                                 <div class="sentiment-bar-fill" id="sentiment-bar-fill" style="width: 50%;"></div>
                             </div>
@@ -99,6 +105,20 @@
                                     <div class="state-progress-fill color-str" id="state-str-fill" style="width: 10%;"></div>
                                 </div>
                                 <span class="state-val" id="state-str-val">Low</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-name">Anger & Hostility</span>
+                                <div class="state-progress">
+                                    <div class="state-progress-fill color-ang" id="state-ang-fill" style="width: 10%;"></div>
+                                </div>
+                                <span class="state-val" id="state-ang-val">Low</span>
+                            </div>
+                            <div class="state-item">
+                                <span class="state-name">Happiness & Positivity</span>
+                                <div class="state-progress">
+                                    <div class="state-progress-fill color-hap" id="state-hap-fill" style="width: 10%;"></div>
+                                </div>
+                                <span class="state-val" id="state-hap-val">Low</span>
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Ensure project root is in sys.path when script is executed directly
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if base_dir not in sys.path:
+    sys.path.insert(0, base_dir)
+
 from flask import Flask
 
 def create_app(test_config=None) -> Flask:
@@ -31,8 +38,15 @@ def create_app(test_config=None) -> Flask:
     app.register_blueprint(views.bp)
     app.register_blueprint(analyze.bp)
 
+    # Preload ML model and tokenizer into memory at server startup
+    try:
+        from src.inference import _load_models
+        _load_models()
+    except Exception as e:
+        print(f"Warning: Could not preload model on startup: {e}")
+
     return app
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

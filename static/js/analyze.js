@@ -21,9 +21,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const stateAnxVal = document.getElementById('state-anx-val');
     const stateStrFill = document.getElementById('state-str-fill');
     const stateStrVal = document.getElementById('state-str-val');
+    const stateAngFill = document.getElementById('state-ang-fill');
+    const stateAngVal = document.getElementById('state-ang-val');
+    const stateHapFill = document.getElementById('state-hap-fill');
+    const stateHapVal = document.getElementById('state-hap-val');
     
     const flaggedBanner = document.getElementById('flagged-banner');
     const riskBadge = document.getElementById('risk-badge');
+    const sarcasmBadge = document.getElementById('sarcasm-badge');
+    const sarcasmNote = document.getElementById('sarcasm-note');
     const ragContextContent = document.getElementById('rag-context-content');
 
     // Samples array
@@ -31,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         "Honestly, lately I feel completely detached from everything. I spend hours staring at walls. I can't find energy to do the basic chores, and sleep doesn't help. I just feel incredibly hopeless about the future, like nothing will ever get better.",
         "Just received my promotion today! Hard work really pays off. Excited to start this new journey with the team, thanks everyone for the support!",
         "My heart has been racing all day. I have this constant knot in my stomach and I keep expecting something terrible to happen, even though nothing is wrong. I can't focus on work and my hands won't stop shaking.",
-        "Stuck in traffic again. This is so annoying. Every single day the commute is just a waste of time. I really need to find a remote job soon.",
+        "Oh fantastic, another panic attack right before my presentation! /s",
+        "Living the dream with 2 hours of sleep and non-stop anxiety",
         "Completely exhausted. Working 14-hour days for the last 3 weeks. I feel like my brain is fried and I have zero patience left. I can't even remember the last time I relaxed or slept a full 8 hours."
     ];
 
@@ -139,9 +146,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgressBar(stateDepFill, stateDepVal, states.depression || 'Low');
         updateProgressBar(stateAnxFill, stateAnxVal, states.anxiety || 'Low');
         updateProgressBar(stateStrFill, stateStrVal, states.stress || 'Low');
+        if (stateAngFill && stateAngVal) {
+            updateProgressBar(stateAngFill, stateAngVal, states.anger || 'Low');
+        }
+        if (stateHapFill && stateHapVal) {
+            updateProgressBar(stateHapFill, stateHapVal, states.happiness || 'Low');
+        }
 
         // Risk Badge & Flagged Banner
         riskBadge.textContent = `Risk Level: ${data.risk_level}`;
+
+        // Toggle Sarcasm Badges
+        if (data.is_sarcastic) {
+            if (sarcasmBadge) sarcasmBadge.classList.remove('hidden');
+            if (sarcasmNote) sarcasmNote.classList.remove('hidden');
+        } else {
+            if (sarcasmBadge) sarcasmBadge.classList.add('hidden');
+            if (sarcasmNote) sarcasmNote.classList.add('hidden');
+        }
         
         if (data.flagged) {
             flaggedBanner.classList.remove('hidden');
