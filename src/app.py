@@ -24,6 +24,12 @@ def create_app(test_config=None) -> Flask:
         SECRET_KEY='dev',
     )
 
+    try:
+        from flask_cors import CORS
+        CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000", "*"]}})
+    except ImportError:
+        pass
+
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:

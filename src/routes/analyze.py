@@ -94,6 +94,16 @@ def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "
     """Multi-signal independent happiness/positivity score (0-1)."""
     import re
     from textblob import TextBlob
+
+    # If the text explicitly negates a positive term (e.g. "not happy", "no joy", "never good"), happiness is 0
+    has_negation_of_pos = flags.get("has_negation_of_positive", False) or bool(re.search(
+        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
+        text, re.IGNORECASE
+    ))
+
+    if has_negation_of_pos:
+        return 0.0
+
     tb_pol = TextBlob(text).sentiment.polarity if text else 0.0
     pos_words = bool(re.search(r'\b(achieved|proud|talented|goal|fitness|milestone|consistency|excited|amazing|happy|great|wonderful|joy|love|success|successful|awesome|good|best|fantastic|win|winning|congrats|cheerful|difference)\b', text, re.IGNORECASE))
 
@@ -108,6 +118,7 @@ def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "
 @bp.route('', methods=['POST'])
 def analyze_text():
     """Endpoint for hybrid text sentiment & psychological analysis."""
+    import re
     data = request.get_json() or {}
     text = data.get('text', '')
     if not text:
@@ -145,8 +156,18 @@ def analyze_text():
         "happiness":  _score_to_level(hap_score),
     }
 
-    # For Happy/Positive posts without sarcasm: risk level is None and not flagged
-    is_positive_post = (predicted_label == "Happy/Positive" or hap_score >= 0.30) and not result.get("is_sarcastic", False)
+    has_negation_of_pos = flags.get("has_negation_of_positive", False) or bool(re.search(
+        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
+        text, re.IGNORECASE
+    ))
+
+    # A post is ONLY positive if model/happiness score says so, AND it is NOT sarcastic, NOT negated, AND NOT predicted as depressed/anxious
+    is_positive_post = (
+        (predicted_label == "Happy/Positive" or hap_score >= 0.30)
+        and not result.get("is_sarcastic", False)
+        and not has_negation_of_pos
+        and predicted_label not in ("Depressed/Sad", "Anxious/Stress")
+    )
 
     if is_positive_post:
         risk_level = "None"

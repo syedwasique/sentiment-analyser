@@ -185,18 +185,24 @@ def predict(raw_text: str) -> dict:
     # TextBlob & negation-based sanity check
     tb_polarity = TextBlob(cleaned).sentiment.polarity
     has_negation_of_positive = bool(re.search(
-        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well)\b',
+        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
         cleaned, re.IGNORECASE
     ))
 
     # Social media & conversational sarcasm detection
     sarcasm_marker = bool(re.search(r'(/s|\b#sarcasm\b|\b#sarcastic\b|\b\(sarcasm\)\b)', raw_text, re.IGNORECASE))
-    has_positive_word = bool(re.search(r'\b(great|fantastic|wonderful|amazing|love|perfect|living the dream|just what i needed)\b', cleaned, re.IGNORECASE))
+    has_positive_word = bool(re.search(r'\b(great|fantastic|wonderful|amazing|love|perfect|perfection|brilliant|awesome|excellent|favorite|joy|best|blessing|outstanding|living the dream|just what i needed)\b', cleaned, re.IGNORECASE))
     has_distress_term = bool(re.search(r'\b(panic|anxiety|attack|depressed|depression|insomnia|sleepless|breakdown|miserable|crying|nightmare|stress)\b', cleaned, re.IGNORECASE))
     
+    # Negative/Frustrating situation context clues for sarcasm contrast
+    negative_context = bool(re.search(
+        r'\b(crash|crashed|crashing|down|delay|delayed|late|wait|waiting|stuck|broken|error|fail|failed|failure|worst|bad|terrible|horrible|annoying|ruined|lost|lost my|useless|garbage|trash|pain|problem|issue|bug|glitch|cancelled|canceled)\b',
+        cleaned, re.IGNORECASE
+    ))
+
     # Conversational sarcasm / rhetorical irony pattern matching
     sarcastic_idioms = bool(re.search(
-        r'(\bwhat could possibly go wrong\b|\bsounded (much )?better in your head\b|\bsetting the bar\b|\bexplaining the obvious\b|\bachieving the absolute minimum\b|\bexactly what everyone wanted\b|\brest of the world must be wrong\b|\blove waiting\b|\bfavorite hobby\b|\bpicked a worse (moment|time)\b|\bspecial kind of confidence\b|\balmost started caring\b|\bmaking it up as you go\b|\bdeserve an award\b|\badding more meetings\b|\bdisconnected from reality\b|\bbrilliant idea\b|\bfantastic timing\b|\boh yes, because\b|\bsure, because\b|\bnothing screams\b|\boh, brilliant\b)',
+        r'(\bwhat could possibly go wrong\b|\bsounded (much )?better in your head\b|\bsetting the bar\b|\bexplaining the obvious\b|\bachieving the absolute minimum\b|\bexactly what everyone wanted\b|\brest of the world must be wrong\b|\blove waiting\b|\bfavorite hobby\b|\bpicked a worse (moment|time)\b|\bspecial kind of confidence\b|\balmost started caring\b|\bmaking it up as you go\b|\bdeserve an award\b|\badding more meetings\b|\bdisconnected from reality\b|\bbrilliant idea\b|\bfantastic timing\b|\boh yes, because\b|\bsure, because\b|\bnothing screams\b|\boh,? (great|brilliant|wonderful|fantastic|perfect|amazing)\b|\bjust (great|wonderful|perfect|what i needed)\b|\bso (great|wonderful|thrilled|excited|happy) about\b|\babsolute perfection\b|\bquality service\b|\bwhat a surprise\b)',
         cleaned, re.IGNORECASE
     ))
 
@@ -214,7 +220,7 @@ def predict(raw_text: str) -> dict:
     # Roman Urdu emotion & sarcasm evaluation (using word-boundary regex)
     has_ru_dep = any(bool(re.search(pat, cleaned, re.IGNORECASE)) for pat in ROMAN_URDU_DEP)
     has_ru_anx = any(bool(re.search(pat, cleaned, re.IGNORECASE)) for pat in ROMAN_URDU_ANX_STRESS)
-    has_ru_sarc = any(bool(re.search(pat, cleaned, re.IGNORECASE)) for pat in ROMAN_URDU_SARCSM_PRAISE) and (has_distress_term or has_burnout_term or has_ru_dep or has_ru_anx)
+    has_ru_sarc = any(bool(re.search(pat, cleaned, re.IGNORECASE)) for pat in ROMAN_URDU_SARCSM_PRAISE) and (has_distress_term or has_burnout_term or has_ru_dep or has_ru_anx or negative_context)
 
     # Anger & Hostility keyword detection (requires physical attack target for "hit")
     has_anger_term = bool(re.search(
@@ -226,15 +232,17 @@ def predict(raw_text: str) -> dict:
 
     # AI HuggingFace Sarcasm Model Inference (Zero-Shot Irony/Sarcasm Classifier)
     ai_sarcasm_detected = False
-    if _sarcasm_pipeline is not None and not (tb_polarity > 0.15 and not has_distress_term and not has_burnout_term and not has_anger_term):
+    if _sarcasm_pipeline is not None:
         try:
             res = _sarcasm_pipeline(raw_text[:256])[0]
-            if res.get('label') in ('LABEL_1', 'irony', 'sarcasm') and res.get('score', 0.0) >= 0.85:
+            label = str(res.get('label', '')).lower()
+            score = float(res.get('score', 0.0))
+            if (label in ('label_1', 'irony', 'sarcasm', 'ironic') and score >= 0.45):
                 ai_sarcasm_detected = True
-        except Exception:
+        except Exception as e:
             pass
 
-    ironic_contrast = (has_positive_word or has_ru_sarc) and (has_distress_term or has_burnout_term or has_ru_dep or has_ru_anx or has_anger_term)
+    ironic_contrast = (has_positive_word or has_ru_sarc) and (has_distress_term or has_burnout_term or has_ru_dep or has_ru_anx or has_anger_term or negative_context)
     is_sarcastic = sarcasm_marker or ironic_contrast or has_ru_sarc or sarcastic_idioms or ai_sarcasm_detected
 
     # Protect genuinely positive posts from false-positive negative overrides

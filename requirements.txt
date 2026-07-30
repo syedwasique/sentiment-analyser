@@ -8,6 +8,7 @@ tweepy
 nrclex
 faiss-cpu
 flask
+flask-cors
 python-dotenv
 requests
 pypdf
