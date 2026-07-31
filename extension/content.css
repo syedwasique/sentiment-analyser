@@ -1,0 +1,541 @@
+/* MindPulse Injected Action Button on Twitter/X */
+.mindpulse-analyze-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background-color: rgba(14, 165, 233, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 9999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-left: 8px;
+  position: relative;
+  user-select: none;
+}
+
+.mindpulse-analyze-btn:hover {
+  background-color: rgba(14, 165, 233, 0.22);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #7dd3fc;
+  box-shadow: 0 0 12px rgba(14, 165, 233, 0.3);
+  transform: translateY(-1px);
+}
+
+.mindpulse-analyze-btn:active {
+  transform: translateY(0);
+}
+
+.mindpulse-btn-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Tooltip for first-use guidance */
+.mindpulse-tooltip {
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0f172a;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mindpulse-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #0f172a transparent transparent transparent;
+}
+
+.mindpulse-analyze-btn:hover .mindpulse-tooltip {
+  opacity: 1;
+}
+
+/* Throttled / Loading State */
+.mindpulse-btn-loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.mindpulse-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(56, 189, 248, 0.3);
+  border-radius: 50%;
+  border-top-color: #38bdf8;
+  animation: mindpulse-spin 0.8s linear infinite;
+}
+
+@keyframes mindpulse-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Toast Notification Banner */
+.mindpulse-toast-banner {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 15px rgba(14, 165, 233, 0.2);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: mindpulse-slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mindpulse-slide-in {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   PREMIUM DRAGGABLE DASHBOARD POP-UP MODAL (MindPulse AI)
+   ========================================================================== */
+
+.mindpulse-dashboard-modal {
+  all: initial;
+  position: fixed;
+  top: 60px;
+  right: 40px;
+  width: 450px;
+  max-width: calc(100vw - 32px);
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.95)) !important;
+  backdrop-filter: blur(20px) -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.75), 0 0 35px rgba(14, 165, 233, 0.2) !important;
+  z-index: 2147483647 !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  color: #f8fafc !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  animation: mindpulse-modal-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  user-select: none;
+}
+
+.mindpulse-dashboard-modal * {
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+}
+
+@keyframes mindpulse-modal-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header & Drag Bar */
+.mindpulse-modal-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  cursor: grab !important;
+}
+
+.mindpulse-dashboard-modal.is-dragging .mindpulse-modal-header {
+  cursor: grabbing !important;
+}
+
+.mindpulse-header-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.mindpulse-brand-icon {
+  width: 22px !important;
+  height: 22px !important;
+  color: #38bdf8 !important;
+  filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)) !important;
+}
+
+.mindpulse-brand-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.01em !important;
+  background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.mindpulse-brand-badge {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  padding: 2px 6px !important;
+  border-radius: 9999px !important;
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.mindpulse-modal-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.mindpulse-drag-hint {
+  font-size: 10px !important;
+  color: #64748b !important;
+  margin-right: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.mindpulse-btn-icon-only {
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.mindpulse-btn-icon-only:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #ffffff !important;
+}
+
+.mindpulse-btn-icon-only.close-btn:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* Modal Body */
+.mindpulse-modal-body {
+  padding: 16px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+}
+
+.mindpulse-modal-body::-webkit-scrollbar {
+  width: 5px !important;
+}
+.mindpulse-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-radius: 4px !important;
+}
+
+/* Top KPI Grid */
+.mindpulse-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+.mindpulse-kpi-card {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  padding: 10px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.mindpulse-kpi-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #94a3b8 !important;
+  margin-bottom: 4px !important;
+}
+
+.mindpulse-kpi-value {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+/* Sentiment Badges */
+.sent-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.sent-Positive {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.2) !important;
+}
+
+.sent-Neutral {
+  background: rgba(148, 163, 184, 0.18) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+}
+
+.sent-Negative {
+  background: rgba(244, 63, 94, 0.18) !important;
+  color: #fb7185 !important;
+  border: 1px solid rgba(244, 63, 94, 0.35) !important;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.2) !important;
+}
+
+/* Risk Badges */
+.risk-pill {
+  display: inline-flex !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.risk-High {
+  background: rgba(239, 68, 68, 0.2) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+}
+
+.risk-Medium {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.4) !important;
+}
+
+.risk-Low {
+  background: rgba(56, 189, 248, 0.2) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+}
+
+.risk-None {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Psychological Indicators Section */
+.mindpulse-section-title {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  color: #94a3b8 !important;
+  margin-bottom: 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.mindpulse-psych-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+.mindpulse-psych-item {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+}
+
+.mindpulse-psych-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 6px !important;
+  font-size: 12px !important;
+}
+
+.mindpulse-psych-name {
+  font-weight: 600 !important;
+  color: #e2e8f0 !important;
+  text-transform: capitalize !important;
+}
+
+.mindpulse-psych-level {
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+.level-High { color: #f87171 !important; }
+.level-Medium { color: #fbbf24 !important; }
+.level-Low { color: #34d399 !important; }
+
+.mindpulse-bar-track {
+  width: 100% !important;
+  height: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+}
+
+.mindpulse-bar-fill {
+  height: 100% !important;
+  border-radius: 9999px !important;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.bar-High {
+  background: linear-gradient(90deg, #f43f5e, #ef4444) !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5) !important;
+}
+.bar-Medium {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24) !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.5) !important;
+}
+.bar-Low {
+  background: linear-gradient(90deg, #10b981, #34d399) !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5) !important;
+}
+
+/* Post Content & Context Card */
+.mindpulse-quote-card {
+  background: rgba(2, 6, 23, 0.6) !important;
+  border-left: 3px solid #38bdf8 !important;
+  border-radius: 0 10px 10px 0 !important;
+  padding: 10px 12px !important;
+  margin-bottom: 14px !important;
+}
+
+.mindpulse-quote-meta {
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  margin-bottom: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.mindpulse-quote-text {
+  font-size: 12px !important;
+  color: #cbd5e1 !important;
+  line-height: 1.45 !important;
+  font-style: italic !important;
+  word-break: break-word !important;
+}
+
+.mindpulse-image-preview {
+  margin-top: 8px !important;
+  border-radius: 8px !important;
+  max-height: 120px !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Clinical Research Disclaimer */
+.mindpulse-disclaimer {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border: 1px solid rgba(245, 158, 11, 0.25) !important;
+  border-radius: 10px !important;
+  padding: 8px 10px !important;
+  font-size: 10px !important;
+  color: #fcd34d !important;
+  line-height: 1.4 !important;
+  margin-bottom: 14px !important;
+  display: flex !important;
+  gap: 8px !important;
+  align-items: flex-start !important;
+}
+
+/* Footer Control Buttons */
+.mindpulse-modal-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+
+.mindpulse-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 7px 14px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0288d1, #0284c7) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(2, 136, 209, 0.4) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #039be5, #0369a1) !important;
+  transform: translateY(-1px) !important;
+}
+

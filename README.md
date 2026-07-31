@@ -6,7 +6,7 @@ MindPulse is a Natural Language Processing (NLP) tool that analyzes social media
 
 ## 🚀 System Architecture
 
-- **Backend (`/src`)**: Flask REST API serving PyTorch ML inference models.
+- **Backend (`/backend`)**: Flask REST API serving PyTorch ML inference models.
 - **Frontend (`/frontend`)**: Modern React application powered by Vite, Tailwind CSS v4, GSAP, Lenis, Framer Motion, Lucide icons, and Recharts.
 
 ---
@@ -14,10 +14,12 @@ MindPulse is a Natural Language Processing (NLP) tool that analyzes social media
 ## 💻 Local Development Setup
 
 ### 1. Backend (Flask API Server — Port 5000)
-Make sure your Python virtual environment is active and dependencies are installed:
+Navigate to the `backend/` folder, activate your virtual environment, and start the server:
 
 ```bash
-# Install Python requirements (including flask-cors)
+cd backend
+
+# Install Python requirements
 pip install -r requirements.txt
 
 # Run the Flask backend

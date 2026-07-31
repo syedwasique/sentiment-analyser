@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "MindPulse — Single-Post Sentiment & Diagnostics",
+  "version": "1.0.0",
+  "description": "Academic FYP research tool for single-post manual sentiment & psychological indicator analysis on Twitter/X.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.twitter.com/*",
+    "*://*.x.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.twitter.com/*",
+        "*://*.x.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MindPulse Analysis Results"
+  },
+  "options_page": "options.html"
+}

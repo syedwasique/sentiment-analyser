@@ -1,13 +1,24 @@
+# Python / Backend
 .venv/
+backend/.venv/
 __pycache__/
 *.pyc
-data/raw/*
-!data/raw/.gitkeep
-data/processed/*
-!data/processed/.gitkeep
-models/roberta_finetuned/*
-!models/roberta_finetuned/.gitkeep
-models/rag_knowledge_base/*
-!models/rag_knowledge_base/.gitkeep
-config/config.ini
+backend/data/raw/*
+!backend/data/raw/.gitkeep
+backend/data/processed/*
+!backend/data/processed/.gitkeep
+backend/models/roberta_finetuned/*
+!backend/models/roberta_finetuned/.gitkeep
+backend/models/rag_knowledge_base/*
+!backend/models/rag_knowledge_base/.gitkeep
+backend/config/config.ini
+backend/last_epoch_checkpoint.pt
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# Brain Cache
 project-brain/cache/
+

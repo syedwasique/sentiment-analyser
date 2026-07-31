@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindPulse Analysis</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="brand-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2a9 9 0 0 0-9 9c0 3.87 2.45 7.17 5.88 8.42.5.09.68-.22.68-.48 0-.24-.01-.88-.01-1.73-2.4.52-2.91-1.16-2.91-1.16-.39-.99-.96-1.26-.96-1.26-.78-.54.06-.53.06-.53.86.06 1.32.89 1.32.89.77 1.32 2.02.94 2.51.72.08-.56.3-.94.55-1.16-1.92-.22-3.94-.96-3.94-4.28 0-.95.34-1.72.89-2.33-.09-.22-.39-1.1.08-2.3 0 0 .73-.23 2.39.89a8.3 8.3 0 0 1 4.36 0c1.66-1.12 2.39-.89 2.39-.89.47 1.2.17 2.08.08 2.3.56.61.89 1.38.89 2.33 0 3.33-2.03 4.05-3.96 4.27.31.27.59.8.59 1.62 0 1.17-.01 2.12-.01 2.41 0 .27.18.58.69.48A9.003 9.003 0 0 0 21 11a9 9 0 0 0-9-9z"/>
+      </svg>
+      <span>MindPulse AI</span>
+    </div>
+    <span class="badge-tag">FYP Research</span>
+  </div>
+
+  <!-- Content Container -->
+  <div class="content">
+    <!-- Mandatory Persistent Clinical Disclaimer -->
+    <div class="disclaimer-card">
+      <div class="disclaimer-title">⚠️ Mandatory Research Disclaimer</div>
+      <div>
+        This is an automated research tool for educational and awareness purposes only. It is not a clinical diagnosis and should not be used to make judgments about real people's mental health.
+      </div>
+    </div>
+
+    <!-- Results Container -->
+    <div id="resultsContainer">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 8v4m0 4h.01"></path>
+        </svg>
+        <p>No post analyzed yet.</p>
+        <p style="font-size: 11px; margin-top: 4px;">Click the <strong>Analyze</strong> button on any Twitter/X post to analyze it.</p>
+      </div>
+    </div>
+
+    <!-- Options Footer Link -->
+    <div style="text-align: right; margin-top: 4px;">
+      <a href="options.html" target="_blank" class="options-link">Extension Settings & Ethics Statement ⚙️</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
