@@ -1,1 +1,2 @@
 *.pt filter=lfs diff=lfs merge=lfs -text
+backend/*.pt filter=lfs diff=lfs merge=lfs -text
