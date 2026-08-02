@@ -31,121 +31,176 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const getLevelPct = (level) => {
-      if (level === "High") return "88%";
+      if (level === "High") return "90%";
       if (level === "Medium") return "55%";
-      return "22%";
+      return "20%";
+    };
+
+    const PSYCH_EXPLANATIONS = {
+      depression: {
+        title: 'Depression & Mood',
+        desc: { High: 'Severe low mood, hopelessness or apathy detected.', Medium: 'Moderate sadness or low emotional energy present.', Low: 'Minimal depressive markers detected.' }
+      },
+      anxiety: {
+        title: 'Anxiety & Panic',
+        desc: { High: 'High panic, dread or physical tension signals.', Medium: 'Noticeable worry or nervousness detected.', Low: 'Calm baseline state.' }
+      },
+      stress: {
+        title: 'Stress & Burnout',
+        desc: { High: 'Critical burnout markers & feeling overwhelmed.', Medium: 'Elevated workload stress or pressure.', Low: 'Optimal coping capacity.' }
+      },
+      anger: {
+        title: 'Anger & Hostility',
+        desc: { High: 'Strong outrage, agitation or hostility phrasing.', Medium: 'Mild irritation or annoyance expressed.', Low: 'No anger or hostility signals.' }
+      },
+      happiness: {
+        title: 'Positivity & Wellness',
+        desc: { High: 'Strong positive emotional state & joy.', Medium: 'Mild pleasant sentiment present.', Low: 'Low expression of positivity.' }
+      }
     };
 
     let html = "";
 
-    // Image context if available
-    if (image_url) {
+    // 1. Author Details & Snippet Card
+    html += `
+      <div class="author-card">
+        <div class="author-header">
+          <div class="author-avatar">👤</div>
+          <div>
+            <div class="author-name">${escapeHtml(author_handle)}</div>
+            <div class="author-meta">Post Target • Single-Post Diagnostics</div>
+          </div>
+        </div>
+        <div class="author-quote">
+          "${escapeHtml(text.length > 160 ? text.substring(0, 160) + '...' : text)}"
+        </div>
+        ${image_url ? `<img src="${escapeHtml(image_url)}" class="image-preview" alt="Attached media" />` : ''}
+      </div>
+    `;
+
+    // 2. SECTION 1: SENTIMENT ANALYSIS
+    html += `
+      <div class="section-container">
+        <div class="section-header border-sentiment">
+          <span class="section-title">1. 🎭 Sentiment Analysis & Tone</span>
+          <span class="section-badge">${confPct}% Confidence</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Sentiment Category</div>
+            <div class="kpi-value">
+              <span class="sent-pill sent-${escapeHtml(sentiment)}">${escapeHtml(sentiment)}</span>
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">Predicted Class</div>
+            <div class="kpi-value" style="color:#38bdf8;">${escapeHtml(predicted_label)}</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-label">Sarcasm Status</div>
+            <div class="kpi-value" style="color:${is_sarcastic ? '#fbbf24' : '#94a3b8'};">
+              ${is_sarcastic ? '⚡ Sarcasm Flag' : '✓ Literal'}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // 3. SECTION 2: PSYCHOLOGICAL ASSESSMENT
+    html += `
+      <div class="section-container">
+        <div class="section-header border-psych">
+          <span class="section-title">2. 🧠 Psychological State Assessment</span>
+          <span class="risk-pill risk-${escapeHtml(risk_level)}">${escapeHtml(risk_level)} Risk</span>
+        </div>
+
+        <div class="psych-list">
+    `;
+
+    Object.entries(psych).forEach(([key, lvl]) => {
+      const info = PSYCH_EXPLANATIONS[key] || { title: key, desc: { High: '', Medium: '', Low: '' } };
+      const exp = info.desc[lvl] || info.desc['Low'];
+
       html += `
-        <div class="image-context-box">
-          <img src="${escapeHtml(image_url)}" class="image-preview" alt="Attached content" />
+        <div class="psych-item">
+          <div class="psych-header">
+            <span class="psych-name">${info.title}</span>
+            <span class="psych-level level-${escapeHtml(lvl)}">${escapeHtml(lvl)} LEVEL</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-${escapeHtml(lvl)}" style="width: ${getLevelPct(lvl)};"></div>
+          </div>
+          <div class="psych-explanation">${escapeHtml(exp)}</div>
         </div>
       `;
-    }
+    });
 
-    // Top KPI Grid
     html += `
-      <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-label">Sentiment</div>
-          <div class="kpi-value">
-            <span class="sent-pill sent-${escapeHtml(sentiment)}">${escapeHtml(sentiment)} ${confPct}%</span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-label">Risk Level</div>
-          <div class="kpi-value">
-            <span class="risk-pill risk-${escapeHtml(risk_level)}">${escapeHtml(risk_level)}</span>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-label">Sarcasm</div>
-          <div class="kpi-value" style="color:${is_sarcastic ? '#fbbf24' : '#94a3b8'};">
-            ${is_sarcastic ? '⚡ Flagged' : '✓ None'}
-          </div>
         </div>
       </div>
+    `;
 
-      <!-- 5 Psychological State Indicators -->
-      <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin: 4px 0 6px 0;">
-        5 Psychological Indicators
-      </div>
-
-      <div class="psych-list">
-        <div class="psych-item">
-          <div class="psych-header">
-            <span class="psych-name">Depression</span>
-            <span class="psych-level" style="color: ${psych.depression === 'High' ? '#f87171' : (psych.depression === 'Medium' ? '#fbbf24' : '#34d399')};">${escapeHtml(psych.depression)}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill bar-${escapeHtml(psych.depression)}" style="width: ${getLevelPct(psych.depression)};"></div>
-          </div>
-        </div>
-
-        <div class="psych-item">
-          <div class="psych-header">
-            <span class="psych-name">Anxiety</span>
-            <span class="psych-level" style="color: ${psych.anxiety === 'High' ? '#f87171' : (psych.anxiety === 'Medium' ? '#fbbf24' : '#34d399')};">${escapeHtml(psych.anxiety)}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill bar-${escapeHtml(psych.anxiety)}" style="width: ${getLevelPct(psych.anxiety)};"></div>
-          </div>
-        </div>
-
-        <div class="psych-item">
-          <div class="psych-header">
-            <span class="psych-name">Stress</span>
-            <span class="psych-level" style="color: ${psych.stress === 'High' ? '#f87171' : (psych.stress === 'Medium' ? '#fbbf24' : '#34d399')};">${escapeHtml(psych.stress)}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill bar-${escapeHtml(psych.stress)}" style="width: ${getLevelPct(psych.stress)};"></div>
-          </div>
-        </div>
-
-        <div class="psych-item">
-          <div class="psych-header">
-            <span class="psych-name">Anger</span>
-            <span class="psych-level" style="color: ${psych.anger === 'High' ? '#f87171' : (psych.anger === 'Medium' ? '#fbbf24' : '#34d399')};">${escapeHtml(psych.anger)}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill bar-${escapeHtml(psych.anger)}" style="width: ${getLevelPct(psych.anger)};"></div>
-          </div>
-        </div>
-
-        <div class="psych-item">
-          <div class="psych-header">
-            <span class="psych-name">Happiness</span>
-            <span class="psych-level" style="color: ${psych.happiness === 'High' ? '#34d399' : (psych.happiness === 'Medium' ? '#fbbf24' : '#94a3b8')};">${escapeHtml(psych.happiness)}</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill" style="width: ${getLevelPct(psych.happiness)}; background: linear-gradient(90deg, #10b981, #34d399);"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quoted snippet -->
-      <div class="quote-card" style="margin-top: 8px;">
-        "${escapeHtml(text.length > 130 ? text.substring(0, 130) + "..." : text)}"
+    // 4. PDF Export Button Bar
+    html += `
+      <div class="action-bar">
+        <button id="extPdfDownloadBtn" class="pdf-export-btn">
+          <span>📄 Export PDF Report</span>
+        </button>
       </div>
     `;
 
     container.innerHTML = html;
+
+    // Attach PDF Download Handler
+    const pdfBtn = document.getElementById("extPdfDownloadBtn");
+    if (pdfBtn) {
+      pdfBtn.addEventListener("click", () => downloadPdfReportFromExtension(data));
+    }
+  }
+
+  async function downloadPdfReportFromExtension(data) {
+    const pdfBtn = document.getElementById("extPdfDownloadBtn");
+    if (pdfBtn) {
+      pdfBtn.disabled = true;
+      pdfBtn.innerHTML = "<span>⏳ Generating PDF...</span>";
+    }
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/analyze/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error("Backend server error");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MindPulse_${(data.author_handle || 'Tweet').replace('@', '')}_Report.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 2000);
+    } catch (err) {
+      alert("Failed to download PDF report: " + err.message);
+    } finally {
+      if (pdfBtn) {
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = "<span>📄 Export PDF Report</span>";
+      }
+    }
   }
 
   function escapeHtml(str) {
-    if (!str) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 });
-

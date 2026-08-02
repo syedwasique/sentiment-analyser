@@ -17,6 +17,12 @@ export default defineConfig({
       '/analyze': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            // Ensure binary responses aren't mangled
+            proxyRes.headers['cache-control'] = 'no-store';
+          });
+        },
       },
     },
   },

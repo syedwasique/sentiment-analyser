@@ -9,16 +9,8 @@ if base_dir not in sys.path:
 from flask import Flask
 
 def create_app(test_config=None) -> Flask:
-    """Flask application factory."""
-    # Project root is one level up from src/
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-    app = Flask(
-        __name__,
-        instance_relative_config=True,
-        template_folder=os.path.join(base_dir, "templates"),
-        static_folder=os.path.join(base_dir, "static"),
-    )
+    """Flask application factory — pure REST API server. All UI is served by Vite."""
+    app = Flask(__name__)
 
     app.config.from_mapping(
         SECRET_KEY='dev',
@@ -26,22 +18,25 @@ def create_app(test_config=None) -> Flask:
 
     try:
         from flask_cors import CORS
-        CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:3000", "http://127.0.0.1:3000", "*"]}})
+        CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
     except ImportError:
         pass
+
+    @app.after_request
+    def add_cors_headers(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
 
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
         app.config.from_mapping(test_config)
 
-    try:
-        os.makedirs(app.instance_path)
-    except OSError:
-        pass
-
-    from src.routes import views, analyze
-    app.register_blueprint(views.bp)
+    # Only register the analyze API blueprint — no views/UI blueprint
+    from src.routes import analyze
     app.register_blueprint(analyze.bp)
 
     # Preload ML model and tokenizer into memory at server startup

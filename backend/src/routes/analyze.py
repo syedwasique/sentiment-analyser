@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 
 bp = Blueprint('analyze', __name__, url_prefix='/analyze')
 
@@ -115,9 +115,11 @@ def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "
     return min(1.0, model_signal + nrc_signal + polarity_signal + keyword_signal)
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['POST', 'OPTIONS'])
 def analyze_text():
     """Endpoint for hybrid text sentiment & psychological analysis."""
+    if request.method == 'OPTIONS':
+        return '', 204
     import re
     data = request.get_json() or {}
     text = data.get('text', '')
@@ -196,5 +198,102 @@ def analyze_text():
         "flagged": flagged,
         "risk_level": risk_level,
         "is_sarcastic": result.get("is_sarcastic", False),
+        "keyword_flags": flags,
     }
     return jsonify(response_data)
+
+
+@bp.route('/pdf', methods=['POST', 'OPTIONS'])
+def generate_pdf_endpoint():
+    """Generates a downloadable PDF report for a given text or result payload."""
+    if request.method == 'OPTIONS':
+        return '', 204
+    data = request.get_json() or {}
+    
+    # If full analysis result isn't passed, analyze the text first
+    if "psychological_states" not in data or "all_scores" not in data:
+        text = data.get("text", "")
+        if not text:
+            return jsonify({"error": "No text provided"}), 400
+        
+        predict = _get_predict()
+        if predict is None:
+            return jsonify({"error": "ML model not available"}), 503
+        
+        result = predict(text)
+        if "error" in result:
+            return jsonify(result), 400
+
+        scores = result["all_scores"]
+        predicted_label = result["predicted_label"]
+        confidence = result["confidence"]
+        lex = result.get("lexicon_scores", {})
+        flags = result.get("keyword_flags", {})
+        raw_anger = result.get("anger_score", 0.0)
+
+        dep_score = _compute_depression_score(scores, lex, flags)
+        anx_score = _compute_anxiety_score(scores, lex, flags)
+        str_score = _compute_stress_score(scores, lex, flags)
+        ang_score = _compute_anger_score(raw_anger, lex, flags)
+        hap_score = _compute_happiness_score(scores, lex, flags, text)
+
+        psychological_states = {
+            "depression": _score_to_level(dep_score),
+            "anxiety":    _score_to_level(anx_score),
+            "stress":     _score_to_level(str_score),
+            "anger":      _score_to_level(ang_score),
+            "happiness":  _score_to_level(hap_score),
+        }
+
+        has_negation_of_pos = flags.get("has_negation_of_positive", False)
+        is_positive_post = (
+            (predicted_label == "Happy/Positive" or hap_score >= 0.30)
+            and not result.get("is_sarcastic", False)
+            and not has_negation_of_pos
+            and predicted_label not in ("Depressed/Sad", "Anxious/Stress")
+        )
+
+        if is_positive_post:
+            risk_level = "None"
+            flagged = False
+        else:
+            max_dim_score = max(dep_score, anx_score, str_score, ang_score)
+            is_concerning = predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
+            flagged = is_concerning and (confidence >= 0.5 or max_dim_score >= 0.5)
+
+            if not is_concerning:
+                risk_level = "None"
+            elif confidence >= 0.75 or max_dim_score >= 0.70:
+                risk_level = "High"
+            elif confidence >= 0.5 or max_dim_score >= 0.45:
+                risk_level = "Medium"
+            else:
+                risk_level = "Low"
+
+        analysis_payload = {
+            "text": text,
+            "sentiment": _emotion_to_sentiment(predicted_label, hap_score),
+            "sentiment_score": max(confidence, hap_score) if is_positive_post else confidence,
+            "predicted_label": "Happy/Positive" if is_positive_post else predicted_label,
+            "all_scores": scores,
+            "psychological_states": psychological_states,
+            "flagged": flagged,
+            "risk_level": risk_level,
+            "is_sarcastic": result.get("is_sarcastic", False),
+        }
+    else:
+        analysis_payload = data
+
+    from src.pdf_generator import generate_pdf_report
+    pdf_buffer = generate_pdf_report(analysis_payload)
+    pdf_buffer.seek(0)
+
+    from flask import make_response
+    pdf_data = pdf_buffer.read()
+    response = make_response(pdf_data)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = 'inline; filename="MindPulse_Analysis_Report.pdf"'
+    response.headers['Content-Length'] = str(len(pdf_data))
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+

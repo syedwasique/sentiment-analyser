@@ -317,9 +317,17 @@ function renderDashboardModal(data) {
   };
 
   const getLevelPct = (level) => {
-    if (level === "High") return "88%";
+    if (level === "High") return "90%";
     if (level === "Medium") return "55%";
-    return "22%";
+    return "20%";
+  };
+
+  const PSYCH_EXPLANATIONS = {
+    depression: { title: 'Depression & Mood', desc: { High: 'Severe low mood or emotional weight detected.', Medium: 'Moderate sadness or fatigue present.', Low: 'Minimal depressive markers detected.' } },
+    anxiety: { title: 'Anxiety & Panic', desc: { High: 'High panic, dread or racing thoughts signals.', Medium: 'Noticeable worry or nervousness detected.', Low: 'Calm baseline state.' } },
+    stress: { title: 'Stress & Burnout', desc: { High: 'Critical burnout markers & overwhelmed.', Medium: 'Elevated workload stress or pressure.', Low: 'Optimal coping capacity.' } },
+    anger: { title: 'Anger & Hostility', desc: { High: 'Strong outrage or hostile phrasing.', Medium: 'Mild irritation or annoyance expressed.', Low: 'No anger or hostility signals.' } },
+    happiness: { title: 'Positivity & Wellness', desc: { High: 'Strong positive emotional state & joy.', Medium: 'Mild pleasant sentiment present.', Low: 'Low expression of positivity.' } }
   };
 
   const modal = document.createElement("div");
@@ -333,19 +341,12 @@ function renderDashboardModal(data) {
           <path d="M12 2a9 9 0 0 0-9 9c0 3.87 2.45 7.17 5.88 8.42.5.09.68-.22.68-.48 0-.24-.01-.88-.01-1.73-2.4.52-2.91-1.16-2.91-1.16-.39-.99-.96-1.26-.96-1.26-.78-.54.06-.53.06-.53.86.06 1.32.89 1.32.89.77 1.32 2.02.94 2.51.72.08-.56.3-.94.55-1.16-1.92-.22-3.94-.96-3.94-4.28 0-.95.34-1.72.89-2.33-.09-.22-.39-1.1.08-2.3 0 0 .73-.23 2.39.89a8.3 8.3 0 0 1 4.36 0c1.66-1.12 2.39-.89 2.39-.89.47 1.2.17 2.08.08 2.3.56.61.89 1.38.89 2.33 0 3.33-2.03 4.05-3.96 4.27.31.27.59.8.59 1.62 0 1.17-.01 2.12-.01 2.41 0 .27.18.58.69.48A9.003 9.003 0 0 0 21 11a9 9 0 0 0-9-9z"/>
         </svg>
         <span class="mindpulse-brand-title">MindPulse AI</span>
-        <span class="mindpulse-brand-badge">Result Dashboard</span>
+        <span class="mindpulse-brand-badge">Diagnostics Dashboard</span>
       </div>
 
       <div class="mindpulse-modal-actions">
-        <span class="mindpulse-drag-hint">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-            <circle cx="9" cy="6" r="2"/><circle cx="15" cy="6" r="2"/>
-            <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
-            <circle cx="9" cy="18" r="2"/><circle cx="15" cy="18" r="2"/>
-          </svg>
-          Drag
-        </span>
-        <button class="mindpulse-btn-icon-only close-btn" id="mindpulseCloseBtn" title="Close Window (Cut)">
+        <span class="mindpulse-drag-hint">Drag</span>
+        <button class="mindpulse-btn-icon-only close-btn" id="mindpulseCloseBtn" title="Close Window">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -355,101 +356,79 @@ function renderDashboardModal(data) {
     </div>
 
     <div class="mindpulse-modal-body">
-      <div class="mindpulse-kpi-grid">
-        <div class="mindpulse-kpi-card">
-          <div class="mindpulse-kpi-label">Sentiment</div>
-          <div class="mindpulse-kpi-value">
-            <span class="sent-pill sent-${escapeHtml(sentiment)}">
-              ${escapeHtml(sentiment)} ${confPct}%
-            </span>
+      <!-- Author Details Card -->
+      <div class="mindpulse-author-card">
+        <div class="mindpulse-author-header">
+          <div class="mindpulse-author-avatar">👤</div>
+          <div>
+            <div class="mindpulse-author-name">${escapeHtml(author_handle)}</div>
+            <div class="mindpulse-author-meta">Post Target • Live Extraction</div>
           </div>
         </div>
-
-        <div class="mindpulse-kpi-card">
-          <div class="mindpulse-kpi-label">Risk Level</div>
-          <div class="mindpulse-kpi-value">
-            <span class="risk-pill risk-${escapeHtml(risk_level)}">
-              ${escapeHtml(risk_level)}
-            </span>
-          </div>
-        </div>
-
-        <div class="mindpulse-kpi-card">
-          <div class="mindpulse-kpi-label">Sarcasm & Flags</div>
-          <div class="mindpulse-kpi-value" style="font-size: 11px; color: ${is_sarcastic ? '#fbbf24' : '#94a3b8'};">
-            ${is_sarcastic ? '⚡ Sarcasm Flagged' : '✓ Normal Text'}
-          </div>
-        </div>
-      </div>
-
-      <div class="mindpulse-section-title">
-        <span>5 Psychological Indicators</span>
-        <span style="font-weight: 500; font-size: 10px; color: #64748b;">Independent Dimensions</span>
-      </div>
-
-      <div class="mindpulse-psych-list">
-        <div class="mindpulse-psych-item">
-          <div class="mindpulse-psych-header">
-            <span class="mindpulse-psych-name">Depression</span>
-            <span class="mindpulse-psych-level level-${escapeHtml(psych.depression)}">${escapeHtml(psych.depression)} Risk</span>
-          </div>
-          <div class="mindpulse-bar-track">
-            <div class="mindpulse-bar-fill bar-${escapeHtml(psych.depression)}" style="width: ${getLevelPct(psych.depression)};"></div>
-          </div>
-        </div>
-
-        <div class="mindpulse-psych-item">
-          <div class="mindpulse-psych-header">
-            <span class="mindpulse-psych-name">Anxiety</span>
-            <span class="mindpulse-psych-level level-${escapeHtml(psych.anxiety)}">${escapeHtml(psych.anxiety)} Risk</span>
-          </div>
-          <div class="mindpulse-bar-track">
-            <div class="mindpulse-bar-fill bar-${escapeHtml(psych.anxiety)}" style="width: ${getLevelPct(psych.anxiety)};"></div>
-          </div>
-        </div>
-
-        <div class="mindpulse-psych-item">
-          <div class="mindpulse-psych-header">
-            <span class="mindpulse-psych-name">Stress & Burnout</span>
-            <span class="mindpulse-psych-level level-${escapeHtml(psych.stress)}">${escapeHtml(psych.stress)} Risk</span>
-          </div>
-          <div class="mindpulse-bar-track">
-            <div class="mindpulse-bar-fill bar-${escapeHtml(psych.stress)}" style="width: ${getLevelPct(psych.stress)};"></div>
-          </div>
-        </div>
-
-        <div class="mindpulse-psych-item">
-          <div class="mindpulse-psych-header">
-            <span class="mindpulse-psych-name">Anger / Hostility</span>
-            <span class="mindpulse-psych-level level-${escapeHtml(psych.anger)}">${escapeHtml(psych.anger)} Risk</span>
-          </div>
-          <div class="mindpulse-bar-track">
-            <div class="mindpulse-bar-fill bar-${escapeHtml(psych.anger)}" style="width: ${getLevelPct(psych.anger)};"></div>
-          </div>
-        </div>
-
-        <div class="mindpulse-psych-item">
-          <div class="mindpulse-psych-header">
-            <span class="mindpulse-psych-name">Happiness & Joy</span>
-            <span class="mindpulse-psych-level" style="color: ${psych.happiness === 'High' ? '#34d399' : (psych.happiness === 'Medium' ? '#fbbf24' : '#94a3b8')};">
-              ${escapeHtml(psych.happiness)} Level
-            </span>
-          </div>
-          <div class="mindpulse-bar-track">
-            <div class="mindpulse-bar-fill" style="width: ${getLevelPct(psych.happiness)}; background: linear-gradient(90deg, #10b981, #34d399); box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="mindpulse-quote-card">
-        <div class="mindpulse-quote-meta">
-          <span>Author: <strong>${escapeHtml(author_handle)}</strong></span>
-          <span>Target: Text & Context</span>
-        </div>
-        <div class="mindpulse-quote-text">
+        <div class="mindpulse-author-quote">
           "${escapeHtml(text.length > 180 ? text.substring(0, 180) + "..." : text)}"
         </div>
-        ${image_url ? `<img src="${escapeHtml(image_url)}" class="mindpulse-image-preview" alt="Attached post image" />` : ''}
+        ${image_url ? `<img src="${escapeHtml(image_url)}" class="mindpulse-image-preview" alt="Attached media" />` : ''}
+      </div>
+
+      <!-- SECTION 1: SENTIMENT ANALYSIS -->
+      <div class="mindpulse-section">
+        <div class="mindpulse-section-header border-sent">
+          <span class="mindpulse-section-title">1. 🎭 Sentiment Analysis & Tone</span>
+          <span class="mindpulse-section-badge">${confPct}% Confidence</span>
+        </div>
+
+        <div class="mindpulse-kpi-grid">
+          <div class="mindpulse-kpi-card">
+            <div class="mindpulse-kpi-label">Sentiment Category</div>
+            <div class="mindpulse-kpi-value">
+              <span class="sent-pill sent-${escapeHtml(sentiment)}">
+                ${escapeHtml(sentiment)}
+              </span>
+            </div>
+          </div>
+
+          <div class="mindpulse-kpi-card">
+            <div class="mindpulse-kpi-label">Predicted Class</div>
+            <div class="mindpulse-kpi-value" style="color: #38bdf8;">
+              ${escapeHtml(predicted_label)}
+            </div>
+          </div>
+
+          <div class="mindpulse-kpi-card">
+            <div class="mindpulse-kpi-label">Sarcasm Status</div>
+            <div class="mindpulse-kpi-value" style="font-size: 11px; color: ${is_sarcastic ? '#fbbf24' : '#94a3b8'};">
+              ${is_sarcastic ? '⚡ Sarcasm Flagged' : '✓ Literal Text'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: PSYCHOLOGICAL ANALYSIS -->
+      <div class="mindpulse-section">
+        <div class="mindpulse-section-header border-psych">
+          <span class="mindpulse-section-title">2. 🧠 Psychological State Assessment</span>
+          <span class="risk-pill risk-${escapeHtml(risk_level)}">${escapeHtml(risk_level)} Risk</span>
+        </div>
+
+        <div class="mindpulse-psych-list">
+          ${Object.entries(psych).map(([key, lvl]) => {
+            const info = PSYCH_EXPLANATIONS[key] || { title: key, desc: { High: '', Medium: '', Low: '' } };
+            const exp = info.desc[lvl] || info.desc['Low'];
+            return `
+              <div class="mindpulse-psych-item">
+                <div class="mindpulse-psych-header">
+                  <span class="mindpulse-psych-name">${info.title}</span>
+                  <span class="mindpulse-psych-level level-${escapeHtml(lvl)}">${escapeHtml(lvl)} LEVEL</span>
+                </div>
+                <div class="mindpulse-bar-track">
+                  <div class="mindpulse-bar-fill bar-${escapeHtml(lvl)}" style="width: ${getLevelPct(lvl)};"></div>
+                </div>
+                <div class="mindpulse-psych-explanation">${escapeHtml(exp)}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
 
       <div class="mindpulse-disclaimer">
@@ -462,16 +441,16 @@ function renderDashboardModal(data) {
       </div>
 
       <div class="mindpulse-modal-footer">
+        <button class="mindpulse-action-btn btn-pdf" id="mindpulsePdfBtn">
+          📄 Export PDF Report
+        </button>
+
         <button class="mindpulse-action-btn btn-secondary" id="mindpulseCopyBtn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
           <span id="mindpulseCopyText">Copy Summary</span>
         </button>
 
         <button class="mindpulse-action-btn btn-primary" id="mindpulseFooterCloseBtn">
-          Close Window
+          Close
         </button>
       </div>
     </div>
@@ -492,6 +471,35 @@ function renderDashboardModal(data) {
 
   if (closeBtn) closeBtn.addEventListener('click', closeHandler);
   if (footerCloseBtn) footerCloseBtn.addEventListener('click', closeHandler);
+
+  const pdfBtn = modal.querySelector('#mindpulsePdfBtn');
+  if (pdfBtn) {
+    pdfBtn.addEventListener('click', async () => {
+      pdfBtn.disabled = true;
+      pdfBtn.innerHTML = `<span>⏳ Generating PDF...</span>`;
+      try {
+        const res = await fetch("http://127.0.0.1:5000/analyze/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error("Backend server error");
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `MindPulse_${(author_handle || 'Tweet').replace('@', '')}_Report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 2000);
+      } catch (err) {
+        alert("PDF Generation Error: " + err.message);
+      } finally {
+        pdfBtn.disabled = false;
+        pdfBtn.innerHTML = `<span>📄 Export PDF Report</span>`;
+      }
+    });
+  }
 
   const copyBtn = modal.querySelector('#mindpulseCopyBtn');
   const copyTextSpan = modal.querySelector('#mindpulseCopyText');
