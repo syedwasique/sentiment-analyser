@@ -45,7 +45,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export async function analyzeText(text: string): Promise<AnalysisResponse> {
   const startTime = performance.now();
-  
+
   try {
     const response = await fetch(`${BASE_URL}/analyze`, {
       method: 'POST',
@@ -69,6 +69,11 @@ export async function analyzeText(text: string): Promise<AnalysisResponse> {
     const data: AnalysisResponse = await response.json();
     const duration = Math.round(performance.now() - startTime);
     data.latency_ms = duration;
+
+    // Ensure smooth UI transitions for extremely fast (~45ms) low latency responses
+    if (duration < 350) {
+      await new Promise((resolve) => setTimeout(resolve, 350 - duration));
+    }
 
     return data;
   } catch (err: any) {

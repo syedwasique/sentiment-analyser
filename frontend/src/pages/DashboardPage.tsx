@@ -638,7 +638,7 @@ export const DashboardPage: React.FC = () => {
       <div className="bg-secondary/30 border-b border-border px-6 py-2 flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center space-x-2 font-mono">
           <span className="text-brand">MindPulse Engine</span><span>/</span>
-          <span className="text-foreground font-semibold">Dual Column Analysis Dashboard</span>
+          <span className="text-foreground font-semibold">Diagnostic Analytics Dashboard</span>
         </div>
         <div className="font-mono text-muted-foreground hidden md:block">
           Features: <code>Voice Journaling • 5-Dimension Psychological Assessment • Weekly Mood Analytics</code>
@@ -764,7 +764,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center"><Smile className="w-5 h-5" /></div>
                     <div><h3 className="text-base font-bold text-foreground">1. Sentiment Analysis</h3><p className="text-xs text-muted-foreground">Tone & emotional polarity</p></div>
                   </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-secondary text-brand border border-border">COLUMN A</span>
+                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Sentiment Engine</span>
                 </div>
 
                 <div className="bg-card border border-border rounded-2xl p-5 shadow-sm space-y-4">
@@ -845,7 +845,7 @@ export const DashboardPage: React.FC = () => {
                     <div className="w-9 h-9 rounded-xl bg-brand/10 border border-brand/20 text-brand flex items-center justify-center"><HeartPulse className="w-5 h-5" /></div>
                     <div><h3 className="text-base font-bold text-foreground">2. Psychological Analysis</h3><p className="text-xs text-muted-foreground">5 Clinical mental health dimensions</p></div>
                   </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded bg-secondary text-brand border border-border">COLUMN B</span>
+                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded bg-brand/10 text-brand border border-brand/20">Psychological Profile</span>
                 </div>
 
                 {/* Enriched Psychological Dimension Cards */}
