@@ -22,3 +22,5 @@ frontend/.env.local
 # Brain Cache
 project-brain/cache/
 
+backend/best_hybrid_model_BACKUP*.pt
+backend/last_epoch_checkpoint.pt

@@ -43,8 +43,8 @@
   bottom: 130%;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #0f172a;
-  color: #f8fafc;
+  background-color: #f8fafc;
+  color: #0f172a;
   font-size: 11px;
   font-weight: 500;
   padding: 6px 10px;
@@ -66,7 +66,7 @@
   transform: translateX(-50%);
   border-width: 5px;
   border-style: solid;
-  border-color: #0f172a transparent transparent transparent;
+  border-color: #f8fafc transparent transparent transparent;
 }
 
 .mindpulse-analyze-btn:hover .mindpulse-tooltip {
@@ -110,15 +110,15 @@
   overflow: hidden !important;
   display: flex !important;
   flex-direction: column !important;
-  background: linear-gradient(145deg, rgba(15, 23, 42, 0.96), rgba(30, 41, 59, 0.96)) !important;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.96)) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(15, 23, 42, 0.15) !important;
   border-radius: 18px !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(56, 189, 248, 0.15) !important;
   z-index: 999999 !important;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  color: #f8fafc !important;
+  color: #0f172a !important;
   animation: mindpulse-modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
@@ -142,8 +142,8 @@
 /* Modal Header */
 .mindpulse-modal-header {
   padding: 14px 18px !important;
-  background: rgba(15, 23, 42, 0.8) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -166,7 +166,7 @@
 .mindpulse-brand-title {
   font-size: 14px !important;
   font-weight: 700 !important;
-  background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%) !important;
+  background: linear-gradient(135deg, #0f172a 30%, #0284c7 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
 }
@@ -224,8 +224,8 @@
 
 /* Author Card */
 .mindpulse-author-card {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
   border-radius: 12px !important;
   padding: 12px !important;
   display: flex !important;
@@ -254,7 +254,7 @@
 .mindpulse-author-name {
   font-weight: 700 !important;
   font-size: 13px !important;
-  color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 .mindpulse-author-meta {
@@ -265,8 +265,8 @@
 .mindpulse-author-quote {
   font-style: italic !important;
   font-size: 11px !important;
-  color: #cbd5e1 !important;
-  background: rgba(2, 6, 23, 0.5) !important;
+  color: #334155 !important;
+  background: rgba(241, 245, 249, 0.8) !important;
   border-left: 3px solid #38bdf8 !important;
   padding: 8px 10px !important;
   border-radius: 0 8px 8px 0 !important;
@@ -275,8 +275,8 @@
 
 /* Distinct Sections */
 .mindpulse-section {
-  background: rgba(30, 41, 59, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
   border-radius: 12px !important;
   padding: 12px !important;
   display: flex !important;
@@ -289,7 +289,7 @@
   align-items: center !important;
   justify-content: space-between !important;
   padding-bottom: 6px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
 }
 
 .border-sent { border-bottom-color: rgba(56, 189, 248, 0.4) !important; }
@@ -298,7 +298,7 @@
 .mindpulse-section-title {
   font-weight: 700 !important;
   font-size: 12px !important;
-  color: #f8fafc !important;
+  color: #0f172a !important;
 }
 
 .mindpulse-section-badge {
@@ -316,8 +316,8 @@
 }
 
 .mindpulse-kpi-card {
-  background: rgba(15, 23, 42, 0.6) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
   border-radius: 10px !important;
   padding: 8px !important;
   text-align: center !important;
@@ -327,7 +327,7 @@
   font-size: 9px !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
-  color: #94a3b8 !important;
+  color: #475569 !important;
   margin-bottom: 4px !important;
 }
 
@@ -370,8 +370,8 @@
 }
 
 .mindpulse-psych-item {
-  background: rgba(15, 23, 42, 0.5) !important;
-  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(15, 23, 42, 0.06) !important;
   border-radius: 8px !important;
   padding: 8px 10px !important;
   display: flex !important;
@@ -386,7 +386,7 @@
   font-size: 11px !important;
 }
 
-.mindpulse-psych-name { font-weight: 700 !important; color: #f8fafc !important; }
+.mindpulse-psych-name { font-weight: 700 !important; color: #0f172a !important; }
 .mindpulse-psych-level { font-weight: 700 !important; font-size: 10px !important; font-family: monospace !important; }
 
 .level-High { color: #f87171 !important; }
@@ -396,7 +396,7 @@
 .mindpulse-bar-track {
   width: 100% !important;
   height: 5px !important;
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.08) !important;
   border-radius: 9999px !important;
   overflow: hidden !important;
 }
@@ -460,11 +460,11 @@
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.08) !important;
-  color: #cbd5e1 !important;
+  background: rgba(15, 23, 42, 0.08) !important;
+  color: #475569 !important;
 }
 
 .btn-primary {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: #ffffff !important;
+  background: rgba(15, 23, 42, 0.15) !important;
+  color: #0f172a !important;
 }

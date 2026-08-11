@@ -1,1 +1,1 @@
-{"EMOTION_LABELS": ["Happy/Positive", "Neutral", "Anxious/Stress", "Depressed/Sad"], "EMOTION_LABEL2ID": {"Happy/Positive": 0, "Neutral": 1, "Anxious/Stress": 2, "Depressed/Sad": 3}}
+{"EMOTION_LABELS": ["Happy/Positive", "Neutral", "Anxious/Stress", "Depressed/Sad", "Anger/Hostility"], "EMOTION_LABEL2ID": {"Happy/Positive": 0, "Neutral": 1, "Anxious/Stress": 2, "Depressed/Sad": 3, "Anger/Hostility": 4}}

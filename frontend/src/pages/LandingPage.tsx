@@ -115,12 +115,12 @@ export const LandingPage: React.FC = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-9 h-9 rounded-lg bg-brand/10 border border-brand/20 flex items-center justify-center text-brand">
-              <Brain className="w-5 h-5" />
+            <div className="w-12 h-12 rounded-2xl bg-slate-950 border border-cyan-500/40 flex items-center justify-center overflow-hidden text-brand shadow-md">
+              <img src="/logo.png" alt="MindPulse" className="w-full h-full object-contain scale-[1.7] drop-shadow-[0_0_6px_rgba(6,182,212,0.5)]" />
             </div>
             <div>
-              <span className="font-bold text-lg tracking-tight text-foreground">MindPulse</span>
-              <span className="text-xs text-brand font-mono ml-2 px-2 py-0.5 rounded bg-brand/10 border border-brand/20">
+              <span className="font-extrabold text-xl tracking-tight text-foreground">MindPulse</span>
+              <span className="text-xs text-cyan-400 font-mono ml-2 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30">
                 v2.4 AI
               </span>
             </div>

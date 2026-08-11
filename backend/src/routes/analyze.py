@@ -28,9 +28,9 @@ def _emotion_to_sentiment(label: str, hap_score: float = 0.0) -> str:
     """Coarse sentiment bucket derived from the psychological-state prediction."""
     if label == "Happy/Positive" or hap_score >= 0.45:
         return "Positive"
-    if label == "Neutral":
-        return "Neutral"
-    return "Negative"  # Anxious/Stress or Depressed/Sad
+    if label in ("Anxious/Stress", "Depressed/Sad", "Anger/Hostility"):
+        return "Negative"
+    return "Neutral"
 
 
 def _compute_depression_score(scores: dict, lex: dict, flags: dict) -> float:
@@ -81,13 +81,14 @@ def _compute_stress_score(scores: dict, lex: dict, flags: dict) -> float:
     return min(0.95, model_signal + nrc_signal + keyword_signal)
 
 
-def _compute_anger_score(anger_score: float, lex: dict, flags: dict) -> float:
+def _compute_anger_score(scores: dict, anger_score: float, lex: dict, flags: dict) -> float:
     """Multi-signal independent anger/hostility score (0-1)."""
-    keyword_signal = anger_score * 0.60
-    nrc_signal     = lex.get("anger", 0.0) * 0.40
+    model_signal   = scores.get("Anger/Hostility", 0.0) * 0.50
+    keyword_signal = anger_score * 0.30
+    nrc_signal     = lex.get("anger", 0.0) * 0.20
     if flags.get("has_anger_term"):
-        keyword_signal = max(keyword_signal, 0.55)
-    return min(1.0, keyword_signal + nrc_signal)
+        keyword_signal = max(keyword_signal, 0.40)
+    return min(1.0, model_signal + keyword_signal + nrc_signal)
 
 
 def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "") -> float:
@@ -104,7 +105,22 @@ def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "
     if has_negation_of_pos:
         return 0.0
 
+    # If the model or rules detected Depressed/Sad or distress, zero out happiness completely
+    if (
+        scores.get("Depressed/Sad", 0.0) >= 0.35
+        or scores.get("Anxious/Stress", 0.0) >= 0.60
+        or scores.get("Anger/Hostility", 0.0) >= 0.60
+        or flags.get("has_explicit_depression", False)
+        or flags.get("has_ru_dep", False)
+        or flags.get("has_distress_term", False)
+        or flags.get("has_burnout_term", False)
+    ):
+        return 0.0
+
     tb_pol = TextBlob(text).sentiment.polarity if text else 0.0
+    if tb_pol < 0:
+        return 0.0
+
     pos_words = bool(re.search(r'\b(achieved|proud|talented|goal|fitness|milestone|consistency|excited|amazing|happy|great|wonderful|joy|love|success|successful|awesome|good|best|fantastic|win|winning|congrats|cheerful|difference)\b', text, re.IGNORECASE))
 
     model_signal   = scores.get("Happy/Positive", 0.0) * 0.50
@@ -147,7 +163,7 @@ def analyze_text():
     dep_score = _compute_depression_score(scores, lex, flags)
     anx_score = _compute_anxiety_score(scores, lex, flags)
     str_score = _compute_stress_score(scores, lex, flags)
-    ang_score = _compute_anger_score(raw_anger, lex, flags)
+    ang_score = _compute_anger_score(scores, raw_anger, lex, flags)
     hap_score = _compute_happiness_score(scores, lex, flags, text)
 
     psychological_states = {
@@ -158,25 +174,48 @@ def analyze_text():
         "happiness":  _score_to_level(hap_score),
     }
 
+    # Guarantee alignment between the primary predicted emotion and the psychological assessment
+    if confidence >= 0.50:
+        if predicted_label == "Anger/Hostility":
+            psychological_states["anger"] = "High"
+        elif predicted_label == "Depressed/Sad":
+            psychological_states["depression"] = "High"
+        elif predicted_label == "Anxious/Stress":
+            psychological_states["anxiety"] = "High"
+            if psychological_states["stress"] == "Low":
+                psychological_states["stress"] = "Medium"
+        elif predicted_label == "Happy/Positive":
+            psychological_states["happiness"] = "High"
+
     has_negation_of_pos = flags.get("has_negation_of_positive", False) or bool(re.search(
         r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
         text, re.IGNORECASE
     ))
 
-    # A post is ONLY positive if model/happiness score says so, AND it is NOT sarcastic, NOT negated, AND NOT predicted as depressed/anxious
+    is_pragmatic_task = flags.get("has_pragmatic_task", False) or flags.get("has_uncertainty_anticipation", False)
+
     is_positive_post = (
-        (predicted_label == "Happy/Positive" or hap_score >= 0.30)
+        (predicted_label == "Happy/Positive" or hap_score >= 0.35)
         and not result.get("is_sarcastic", False)
         and not has_negation_of_pos
+        and not is_pragmatic_task
         and predicted_label not in ("Depressed/Sad", "Anxious/Stress")
     )
 
-    if is_positive_post:
+    final_predicted_label = "Happy/Positive" if is_positive_post else predicted_label
+
+    if is_pragmatic_task:
+        sentiment_val = "Neutral"
+        risk_level = "None"
+        flagged = False
+    elif is_positive_post:
+        sentiment_val = "Positive"
         risk_level = "None"
         flagged = False
     else:
+        sentiment_val = _emotion_to_sentiment(final_predicted_label, hap_score)
         max_dim_score = max(dep_score, anx_score, str_score, ang_score)
-        is_concerning = predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
+        is_concerning = final_predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
         flagged = is_concerning and (confidence >= 0.5 or max_dim_score >= 0.5)
 
         if not is_concerning:
@@ -190,9 +229,9 @@ def analyze_text():
 
     response_data = {
         "text": text,
-        "sentiment": _emotion_to_sentiment(predicted_label, hap_score),
+        "sentiment": sentiment_val,
         "sentiment_score": max(confidence, hap_score) if is_positive_post else confidence,
-        "predicted_label": "Happy/Positive" if is_positive_post else predicted_label,
+        "predicted_label": final_predicted_label,
         "all_scores": scores,
         "psychological_states": psychological_states,
         "flagged": flagged,
@@ -247,18 +286,20 @@ def generate_pdf_endpoint():
 
         has_negation_of_pos = flags.get("has_negation_of_positive", False)
         is_positive_post = (
-            (predicted_label == "Happy/Positive" or hap_score >= 0.30)
+            (predicted_label == "Happy/Positive" or hap_score >= 0.35)
             and not result.get("is_sarcastic", False)
             and not has_negation_of_pos
             and predicted_label not in ("Depressed/Sad", "Anxious/Stress")
         )
+
+        final_predicted_label = "Happy/Positive" if is_positive_post else predicted_label
 
         if is_positive_post:
             risk_level = "None"
             flagged = False
         else:
             max_dim_score = max(dep_score, anx_score, str_score, ang_score)
-            is_concerning = predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
+            is_concerning = final_predicted_label in ("Anxious/Stress", "Depressed/Sad") or max_dim_score >= 0.50
             flagged = is_concerning and (confidence >= 0.5 or max_dim_score >= 0.5)
 
             if not is_concerning:
@@ -272,9 +313,9 @@ def generate_pdf_endpoint():
 
         analysis_payload = {
             "text": text,
-            "sentiment": _emotion_to_sentiment(predicted_label, hap_score),
+            "sentiment": _emotion_to_sentiment(final_predicted_label, hap_score),
             "sentiment_score": max(confidence, hap_score) if is_positive_post else confidence,
-            "predicted_label": "Happy/Positive" if is_positive_post else predicted_label,
+            "predicted_label": final_predicted_label,
             "all_scores": scores,
             "psychological_states": psychological_states,
             "flagged": flagged,

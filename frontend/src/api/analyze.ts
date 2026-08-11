@@ -37,11 +37,11 @@ export interface AnalysisResponse {
   is_sarcastic: boolean;
   keyword_flags?: KeywordFlags;
   error?: string;
+  latency_ms?: number;
 }
 
 // In dev, proxy handles /analyze. Can override with VITE_API_BASE_URL env if provided.
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
-const BACKEND_DIRECT = 'http://127.0.0.1:5000';
 
 export async function analyzeText(text: string): Promise<AnalysisResponse> {
   const startTime = performance.now();
@@ -56,17 +56,19 @@ export async function analyzeText(text: string): Promise<AnalysisResponse> {
     });
 
     if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error || `Server error: ${response.status}`);
+      let errMsg = `Server error: ${response.status}`;
+      try {
+        const errJson = await response.json();
+        errMsg = errJson.error || errJson.message || errMsg;
+      } catch {
+        // use status text
+      }
+      throw new Error(errMsg);
     }
 
     const data: AnalysisResponse = await response.json();
-    
-    // Ensure smooth UI transitions for extremely fast (~45ms) low latency responses
-    const elapsed = performance.now() - startTime;
-    if (elapsed < 350) {
-      await new Promise((resolve) => setTimeout(resolve, 350 - elapsed));
-    }
+    const duration = Math.round(performance.now() - startTime);
+    data.latency_ms = duration;
 
     return data;
   } catch (err: any) {
@@ -75,7 +77,7 @@ export async function analyzeText(text: string): Promise<AnalysisResponse> {
   }
 }
 
-export async function fetchPdfReportBlob(analysisData: Record<string, unknown>): Promise<Blob> {
+export async function fetchPdfReportBlob(analysisData: AnalysisResponse | Record<string, unknown>): Promise<Blob> {
   const urls = ['/analyze/pdf', 'http://127.0.0.1:5000/analyze/pdf'];
   let lastErr: Error | null = null;
 
