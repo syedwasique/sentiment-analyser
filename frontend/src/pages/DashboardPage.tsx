@@ -455,6 +455,15 @@ export const DashboardPage: React.FC = () => {
 
   const dominantState = useMemo(() => {
     if (!result) return null;
+    
+    // Always align the dominant state with the primary predicted class from the neural network
+    const predicted = result.predicted_label;
+    if (predicted === 'Anger/Hostility') return 'anger';
+    if (predicted === 'Anxious/Stress') return 'anxiety'; // or 'stress' based on context, we'll default to anxiety
+    if (predicted === 'Depressed/Sad') return 'depression';
+    if (predicted === 'Happy/Positive') return 'happiness';
+
+    // Fallback if neutral or unmapped
     let highestVal = -1;
     let dominant = 'happiness';
     Object.entries(result.psychological_states).forEach(([key, level]) => {
@@ -533,12 +542,25 @@ export const DashboardPage: React.FC = () => {
     ];
   };
 
+  const formatPredictedClass = (label: string) => {
+    if (label === 'Anger/Hostility') return 'Anger & Hostility';
+    if (label === 'Anxious/Stress') return 'Anxiety & Panic';
+    if (label === 'Depressed/Sad') return 'Depression & Mood';
+    if (label === 'Happy/Positive') return 'Happiness & Positivity';
+    return 'Neutral';
+  };
+
   const getClassProbabilitiesData = () => {
     if (!result || !result.all_scores) return [];
-    return Object.entries(result.all_scores).map(([className, score]) => ({
-      name: className,
-      probability: Math.round(score * 100),
-    }));
+    const scores = result.all_scores;
+    return [
+      { name: 'Anger', probability: Math.round((scores['Anger/Hostility'] || 0) * 100) },
+      { name: 'Anxiety', probability: Math.round((scores['Anxious/Stress'] || 0) * 100) },
+      { name: 'Depression', probability: Math.round((scores['Depressed/Sad'] || 0) * 100) },
+      { name: 'Happiness', probability: Math.round((scores['Happy/Positive'] || 0) * 100) },
+      { name: 'Stress', probability: Math.round((scores['Anxious/Stress'] || 0) * 100) },
+      { name: 'Neutral', probability: Math.round((scores['Neutral'] || 0) * 100) },
+    ];
   };
 
   const getActiveFlags = () => FLAG_DEFS.filter(f => result?.keyword_flags?.[f.key]);
@@ -778,7 +800,7 @@ export const DashboardPage: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-2xl font-black text-foreground tracking-tight block">{result.sentiment}</span>
-                      <span className="text-xs font-mono text-muted-foreground block mt-0.5">Predicted Class: <strong className="text-brand">{result.predicted_label}</strong></span>
+                      <span className="text-xs font-mono text-muted-foreground block mt-0.5">Predicted Class: <strong className="text-brand">{formatPredictedClass(result.predicted_label)}</strong></span>
                     </div>
                   </div>
                   <div className="pt-3 border-t border-border flex items-center justify-between">
@@ -801,7 +823,7 @@ export const DashboardPage: React.FC = () => {
                         <Tooltip cursor={{fill: 'hsl(var(--secondary))'}} contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))', borderRadius: '8px' }} />
                         <Bar dataKey="probability" radius={[6, 6, 0, 0]} animationDuration={1500}>
                           {getClassProbabilitiesData().map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.name.includes('Happy') ? 'url(#emeraldGradient)' : entry.name.includes('Anxious') ? 'url(#amberGradient)' : entry.name.includes('Depressed') || entry.name.includes('Anger') ? 'url(#redGradient)' : 'url(#brandGradient)'} />
+                            <Cell key={`cell-${index}`} fill={entry.name.includes('Happy') ? 'url(#emeraldGradient)' : entry.name.includes('Anxiety') ? 'url(#amberGradient)' : entry.name.includes('Depression') || entry.name.includes('Anger') || entry.name.includes('Stress') ? 'url(#redGradient)' : 'url(#brandGradient)'} />
                           ))}
                         </Bar>
                       </BarChart>
@@ -856,9 +878,25 @@ export const DashboardPage: React.FC = () => {
                   <div className="space-y-3">
                     {Object.entries(result.psychological_states).map(([stateKey, level]) => {
                       const info = PSYCH_DIMENSIONS_INFO[stateKey];
-                      const description = info.desc[level] || info.desc['Low'];
+                      
+                      // Fix: Map stateKey to the raw probabilities for accurate graph sizing
+                      let rawScore = 0;
+                      if (result.all_scores) {
+                        if (stateKey === 'anger') rawScore = result.all_scores['Anger/Hostility'] || 0;
+                        else if (stateKey === 'anxiety' || stateKey === 'stress') rawScore = result.all_scores['Anxious/Stress'] || 0;
+                        else if (stateKey === 'depression') rawScore = result.all_scores['Depressed/Sad'] || 0;
+                        else if (stateKey === 'happiness') rawScore = result.all_scores['Happy/Positive'] || 0;
+                      }
+                      
                       const isDominant = stateKey === dominantState;
-                      const intensityPct = levelToVal(level);
+                      const intensityPct = Math.max(levelToVal(level), Math.round(rawScore * 100));
+                      
+                      let description = info.desc[level] || info.desc['Low'];
+                      if (isDominant && level === 'Low') {
+                         description = "Small signs of this emotional pattern were detected as the primary linguistic signal, though overall intensity is relatively low.";
+                      } else if (level === 'Low' && rawScore >= 0.20) {
+                         description = `Mild underlying signs detected, though not elevated enough to be a primary concern.`;
+                      }
 
                       return (
                         <div key={stateKey} className={`bg-background border rounded-xl p-4 space-y-3 relative overflow-hidden transition-all ${isDominant ? 'border-brand shadow-[0_0_15px_rgba(6,182,212,0.15)] scale-[1.01]' : 'border-border'}`}>

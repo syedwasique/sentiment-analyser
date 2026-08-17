@@ -50,4 +50,4 @@ def create_app(test_config=None) -> Flask:
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, use_reloader=True)
+    app.run(debug=False, use_reloader=False)

@@ -185,10 +185,10 @@ def predict(raw_text: str) -> dict:
     # TextBlob & negation-based sanity check
     tb_polarity = TextBlob(cleaned).sentiment.polarity
     has_negation_of_positive = bool(re.search(
-        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent|nothing|nobody|no\s*one|hardly|barely)\s+(very\s+|really\s+|ever\s+|even\s+|at\s+all\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied|better|hope|smile|laugh|relief|peace)\b|'
-        r'\b(nothing|no\s*one|nobody|not\s+a\s+thing|hardly\s+anything|barely\s+anything)\s+(seems\s+to|is\s+able\s+to|can|could|will|ever)?\s*(make\s+me|help\s+me|bring\s+me|give\s+me|lift\s+my|cheer\s+me|comfort\s+me|change)?\s*(feel\s+better|feel\s+good|feel\s+happy|happy|smile|joy|hope|pleasure|relief|peace|spirits|mood|better|okay|fine|laugh|help|work)\b|'
+        r'\b(not|never|n\'t|dont|don\'t|don\s+t|doesn\'t|doesnt|didn\'t|didnt|wasn\'t|wasnt|weren\'t|werent|haven\'t|havent|hasn\'t|hasnt|hadn\'t|hadnt|ain\'t|aint|hardly|barely|no|cannot|cant|can\'t|without|lack\s+of|no\s+longer|stopped)\s+(even\s+|really\s+|very\s+|quite\s+|at\s+all\s+|always\s+|ever\s+|actually\s+|truly\s+|personally\s+|currently\s+|lately\s+|recently\s+|today\s+)?(been\s+|being\s+|be\s+|seem\s+|seems\s+|seemed\s+|sound\s+|sounds\s+|sounded\s+|look\s+|looks\s+|looked\s+|feel\s+|feels\s+|feeling\s+|felt\s+|do\s+|does\s+|doing\s+|did\s+|get\s+|gets\s+|getting\s+|got\s+|go\s+|going\s+|went\s+)?(like\s+|to\s+be\s+|up\s+to\s+)?(very\s+|really\s+|ever\s+|even\s+|at\s+all\s+|too\s+|that\s+|so\s+|much\s+|any\s+|completely\s+|fully\s+|100%\s+)?(happy|good|fine|okay|ok|alright|great|joy|joyful|pleased|cheerful|excited|well|peaceful|content|satisfied|better|best|hope|hopeful|smile|smiling|laugh|laughing|relief|relieved|peace|myself|normal|healthy|health|right|positive|positivity|safe|alive|energetic|motivated|rested|sane|thriving)\b|'
+        r'\b(nothing|no\s*one|nobody|not\s+a\s+thing|hardly\s+anything|barely\s+anything)\s+(seems\s+to|is\s+able\s+to|can|could|will|ever)?\s*(make\s+me|help\s+me|bring\s+me|give\s+me|lift\s+my|cheer\s+me|comfort\s+me|change)?\s*(feel\s+better|feel\s+good|feel\s+happy|feel\s+well|happy|smile|joy|hope|pleasure|relief|peace|spirits|mood|better|okay|fine|laugh|help|work)\b|'
         r'\b(nothing|no\s*one|nobody|hardly\s+anything)\s+(helps|works|matters|changes|fixes\s+this|makes\s+a\s+difference|makes\s+me\s+smile|brings\s+joy|brings\s+happiness)\b|'
-        r'\b(cannot|cant|can\'t|unable\s+to|hard\s+to|impossible\s+to|struggling\s+to|failed\s+to)\s+(seem\s+to\s+)?(find|feel|see|experience|get|have)?\s*(any\s+)?(joy|happiness|peace|hope|pleasure|meaning|purpose|relief|better|good|positive|smile|laugh|care|motivation)\b',
+        r'\b(cannot|cant|can\'t|unable\s+to|hard\s+to|impossible\s+to|struggling\s+to|failed\s+to)\s+(seem\s+to\s+)?(find|feel|see|experience|get|have)?\s*(any\s+)?(joy|happiness|peace|hope|pleasure|meaning|purpose|relief|better|good|positive|smile|laugh|care|motivation|wellbeing)\b',
         cleaned, re.IGNORECASE
     ))
 
@@ -196,7 +196,7 @@ def predict(raw_text: str) -> dict:
     sarcasm_marker = bool(re.search(r'(/s|\b#sarcasm\b|\b#sarcastic\b|\b\(sarcasm\)\b)', raw_text, re.IGNORECASE))
     has_positive_word = bool(re.search(r'\b(great|fantastic|wonderful|amazing|love|perfect|perfection|brilliant|awesome|excellent|favorite|joy|best|blessing|outstanding|living the dream|just what i needed|thanks|wow|happier|time of my life|thrilled|blessed|glad|lucky|fun|enjoy|enjoying|best thing|fun time|what a joy|good times|cant wait|can\'t wait|so excited|so happy|excitement|proud|grateful|appreciate|thankful|kindness|incredible|motivated|exhilarating|completed|handled|better|good)\b', cleaned, re.IGNORECASE))
     has_distress_term = bool(re.search(
-        r'\b(panic|anxiety|attack|insomnia|sleepless|breakdown|nightmare|stress|stressed|so stressed|stressing|stressful|overwhelmed|concentrate|lose focus|cant focus|can\'t focus|havent been able|haven\'t been able|dont know how i\'ll manage|don\'t know how i\'ll manage|cant manage|can\'t manage|cant cope|can\'t cope|struggling|drowning|terrible|terrible day|horrible|awful|miserable day)\b',
+        r'\b(panic|anxiety|attack|insomnia|sleepless|breakdown|nightmare|stress|stressed|so stressed|stressing|stressful|overwhelmed|concentrate|lose focus|cant focus|can\'t focus|havent been able|haven\'t been able|dont know how i\'ll manage|don\'t know how i\'ll manage|cant manage|can\'t manage|cant cope|can\'t cope|struggling|drowning|terrible|terrible day|horrible|awful|miserable day|unwell|sick|ill|sickness|illness|fever|feverish|nauseous|nausea|dizzy|dizziness|fainting|fainted|vomiting|throwing up|in pain|hurting|hurts|headache|migraine|body ache|stomach ache|bad shape|not feeling well|not feeling good|not doing well)\b',
         cleaned, re.IGNORECASE
     ))
 
@@ -230,7 +230,7 @@ def predict(raw_text: str) -> dict:
 
     # Anger & Hostility keyword detection
     has_anger_term = bool(re.search(
-        r'\b(punch|puch|kill|fight|attack|slap|beat|smash|destroy|furious|angry|rage|raging|hatred|hate|hating|enraged|enrage|seething|seethe|livid|outraged|infuriated|infuriating|gussa|ghussa|nafrat|maroonga|maaroonga|shut up|threat|annoyed|annoying|frustrated|frustrating|irritated|irritating|pissed|mad|resent|resentful|disgusted|disgusting|sick of|tired of|fed up|had enough|lost my temper|drives me crazy|driving me crazy|makes me sick|makes me mad|did nothing|did absolutely nothing|didnt do anything|didn\'t do anything|nothing was done|never fixed|never responded|never helped|ignored|scam|liars|lied|empty promise|broken promise|useless|waste of time|rude|rudely|disrespectful|disrespect|appalling|outrageous|unacceptable|unbelievable|cannot believe|can\'t believe|disgusting behavior|disgraceful|shameful|insolent|insolence|contempt|contemptuous|condescending|belittle|belittling|bully|bullying|hostile|hostility|aggressive|aggression|intimidate|intimidating|threatening)\b|\b(cant stand|can\'t stand|nobody listens|nobody ever listens|no one listens|nobody listens|why does nobody|dont want to talk|don\'t want to talk|dont want to deal|don\'t want to deal|screw this|screw you|how dare|how dare they|how dare you)\b|\bhit\s+(him|her|them|me|us|you|people|person|face|head)\b',
+        r'\b(punch|puch|kill|fight|attack|slap|beat|smash|destroy|furious|angry|rage|raging|hatred|hate|hating|enraged|enrage|seething|seethe|livid|outraged|infuriated|infuriating|gussa|ghussa|nafrat|maroonga|maaroonga|shut up|threat|annoyed|annoying|frustrated|frustrating|irritated|irritating|pissed|mad|resent|resentful|disgusted|disgusting|sick of|tired of|fed up|had enough|lost my temper|drives me crazy|driving me crazy|makes me sick|makes me mad|did nothing|did absolutely nothing|didnt do anything|didn\'t do anything|nothing was done|never fixed|never responded|never helped|ignored|scam|liars|lied|empty promise|broken promise|useless|waste of time|rude|rudely|disrespectful|disrespect|appalling|outrageous|unacceptable|unbelievable|cannot believe|can\'t believe|disgusting behavior|disgraceful|shameful|insolent|insolence|contempt|contemptuous|condescending|belittle|belittling|bully|bullying|hostile|hostility|aggressive|aggression|intimidate|intimidating|threatening|terrible|horrible|awful|worst|ruined|ridiculous|wrong|garbage|trash|poor service|complaint|refused|denied|cold|waited)\b|\b(cant stand|can\'t stand|nobody listens|nobody ever listens|no one listens|nobody listens|why does nobody|dont want to talk|don\'t want to talk|dont want to deal|don\'t want to deal|screw this|screw you|how dare|how dare they|how dare you)\b|\bhit\s+(him|her|them|me|us|you|people|person|face|head)\b',
         cleaned, re.IGNORECASE
     ))
     nrc_anger = lex_scores.get("anger", 0.0)
@@ -371,7 +371,8 @@ def predict(raw_text: str) -> dict:
         r'sick of feeling|sick of living|sick of this pain|tired of this pain|'
         r'frustrated with myself|disgusted with myself|nothing gets better|nothing ever gets better|'
         r'everything is terrible|everything is ruined|terrible day|horrible|awful|miserable day|'
-        r'(haven\'t|havent|don\'t|dont|not)\s+(been\s+)?(feeling|feel|felt)(\s+like)?\s+(myself|okay|ok|alright|fine)|'
+        r'(haven\'t|havent|hasn\'t|hasnt|don\'t|dont|doesn\'t|doesnt|didn\'t|didnt|wasn\'t|wasnt|weren\'t|werent|ain\'t|aint|not|never)\s+(been\s+)?(feeling|feel|felt|doing|do|did|seem|seems|seemed)(\s+(to\s+be|like))?\s+(very\s+|really\s+|so\s+|too\s+|that\s+)?(well|good|great|okay|ok|alright|fine|myself|normal|better|happy|healthy|right|positive|up\s+to\s+it|100%)\b|'
+        r'(feeling|feel|felt|am|is|are|was|were|been)\s+(unwell|ill|sick|bad|awful|terrible|horrible|in\s+pain|nauseous|dizzy|weak|feverish|hurting)\b|'
         r'(nobody|no\s*one)\s+(really\s+)?(understands|gets|listens|cares)|'
         r'what\s+i(\'m|\s+am)\s+going\s+through|'
         r'(miss|wish)\s+(how\s+)?things\s+(used\s+to\s+be|were|were\s+like|before)|'
@@ -469,7 +470,7 @@ def predict(raw_text: str) -> dict:
         sarcasm_marker or
         sarcastic_idioms or
         tb_polarity < -0.40 or
-        bool(re.search(r'\b(nothing|nobody|no one|never|cannot|cant|can\'t|dont|don\'t|bad|sad|pain|hurts|hurt|alone|lost|empty|hopeless|tired|exhausted|useless|broken|fail|failure|dread|dark|miss|sick of|crying|tears|terrible|horrible|worst|ruined|garbage|trash)\b', cleaned, re.IGNORECASE))
+        bool(re.search(r'\b(nothing|nobody|no one|never|cannot|cant|can\'t|dont|don\'t|bad|sad|pain|hurts|hurt|alone|lost|empty|hopeless|tired|exhausted|useless|broken|fail|failure|dread|dark|miss|sick|sick of|unwell|ill|crying|tears|terrible|horrible|worst|ruined|garbage|trash|not well|not good|not okay|not fine|not great|not happy)\b', cleaned, re.IGNORECASE))
     )
 
     has_accomplishment_or_gratitude = bool(re.search(r'\b(finally completed|proud|appreciate|grateful|thankful|achieved|success|exhilarating|not giving up|never give up|didn\'t give up|didnt give up|won\'t give up)\b', cleaned, re.IGNORECASE))
@@ -478,7 +479,7 @@ def predict(raw_text: str) -> dict:
     if has_neutral_sentence or has_positive_resolution or has_accomplishment_or_gratitude:
         has_negative_indicators = False
 
-    is_genuinely_positive = not is_sarcastic and (
+    is_genuinely_positive = not is_sarcastic and not has_negation_of_positive and (
         has_positive_resolution or has_accomplishment_or_gratitude or
         (has_positive_keywords and (tb_polarity >= -0.20 or has_conflict_resolution) and not has_negative_indicators)
     )
@@ -511,6 +512,16 @@ def predict(raw_text: str) -> dict:
         # Fallback if no specific negative category was strongly triggered but it's generally negative
         if anx_prob < 0.3 and dep_prob < 0.3 and ang_prob < 0.3:
             dep_prob = max(0.60, dep_prob + 0.40)
+
+    # 5. Universal TextBlob Safety Net
+    # If TextBlob (standard English NLP) clearly sees the sentence as negative
+    # but the neural network is still showing Happy/Positive as the top class, override it.
+    # This catches any natural everyday sentences the model may have missed.
+    if tb_polarity < -0.15 and not is_genuinely_positive and hap_prob > (dep_prob + anx_prob + ang_prob):
+        hap_prob = 0.00
+        neu_prob = 0.00
+        if dep_prob < 0.50:
+            dep_prob = max(0.65, dep_prob + 0.40)
 
     # Build 5-Emotion Class Distribution for UI (Neutral included)
     ui_emotion_scores = {

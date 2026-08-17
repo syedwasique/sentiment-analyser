@@ -98,7 +98,7 @@ def _compute_happiness_score(scores: dict, lex: dict, flags: dict, text: str = "
 
     # If the text explicitly negates a positive term (e.g. "not happy", "no joy", "never good"), happiness is 0
     has_negation_of_pos = flags.get("has_negation_of_positive", False) or bool(re.search(
-        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
+        r'\b(not|never|n\'t|dont|don\'t|doesn\'t|doesnt|didn\'t|didnt|wasn\'t|wasnt|weren\'t|werent|haven\'t|havent|hasn\'t|hasnt|hadn\'t|hadnt|ain\'t|aint|hardly|barely|no|cannot|cant|can\'t|without|lack\s+of|no\s+longer|stopped)\s+(even\s+|really\s+|very\s+|quite\s+|at\s+all\s+|always\s+|ever\s+|actually\s+|truly\s+|personally\s+|currently\s+|lately\s+|recently\s+|today\s+)?(been\s+|being\s+|be\s+|seem\s+|seems\s+|seemed\s+|sound\s+|sounds\s+|sounded\s+|look\s+|looks\s+|looked\s+|feel\s+|feels\s+|feeling\s+|felt\s+|do\s+|does\s+|doing\s+|did\s+|get\s+|gets\s+|getting\s+|got\s+)?(like\s+|to\s+be\s+|up\s+to\s+)?(very\s+|really\s+|ever\s+|even\s+|at\s+all\s+|too\s+|that\s+|so\s+|much\s+|any\s+|completely\s+|fully\s+|100%\s+)?(happy|good|fine|okay|ok|alright|great|joy|joyful|pleased|cheerful|excited|well|peaceful|content|satisfied|better|best|hope|hopeful|smile|smiling|laugh|laughing|relief|relieved|peace|myself|normal|healthy|health|right|positive|positivity|safe|alive|energetic|motivated|rested|sane|thriving)\b',
         text, re.IGNORECASE
     ))
 
@@ -188,7 +188,7 @@ def analyze_text():
             psychological_states["happiness"] = "High"
 
     has_negation_of_pos = flags.get("has_negation_of_positive", False) or bool(re.search(
-        r'\b(not|never|n\'t|dont|don\'t|no|cant|cannot|isnt|isn\'t|wasnt|wasn\'t|aren\'t|arent)\s+(very\s+)?(happy|good|fine|okay|great|joy|pleased|cheerful|excited|well|peaceful|content|satisfied)\b',
+        r'\b(not|never|n\'t|dont|don\'t|doesn\'t|doesnt|didn\'t|didnt|wasn\'t|wasnt|weren\'t|werent|haven\'t|havent|hasn\'t|hasnt|hadn\'t|hadnt|ain\'t|aint|hardly|barely|no|cannot|cant|can\'t|without|lack\s+of|no\s+longer|stopped)\s+(even\s+|really\s+|very\s+|quite\s+|at\s+all\s+|always\s+|ever\s+|actually\s+|truly\s+|personally\s+|currently\s+|lately\s+|recently\s+|today\s+)?(been\s+|being\s+|be\s+|seem\s+|seems\s+|seemed\s+|sound\s+|sounds\s+|sounded\s+|look\s+|looks\s+|looked\s+|feel\s+|feels\s+|feeling\s+|felt\s+|do\s+|does\s+|doing\s+|did\s+|get\s+|gets\s+|getting\s+|got\s+)?(like\s+|to\s+be\s+|up\s+to\s+)?(very\s+|really\s+|ever\s+|even\s+|at\s+all\s+|too\s+|that\s+|so\s+|much\s+|any\s+|completely\s+|fully\s+|100%\s+)?(happy|good|fine|okay|ok|alright|great|joy|joyful|pleased|cheerful|excited|well|peaceful|content|satisfied|better|best|hope|hopeful|smile|smiling|laugh|laughing|relief|relieved|peace|myself|normal|healthy|health|right|positive|positivity|safe|alive|energetic|motivated|rested|sane|thriving)\b',
         text, re.IGNORECASE
     ))
 
