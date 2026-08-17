@@ -14,7 +14,7 @@ let latestAnalysis = null;
 
 async function postToFlask(url, text) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 6000);
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
     const res = await fetch(url, {

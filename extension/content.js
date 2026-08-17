@@ -185,13 +185,13 @@ function injectAnalyzeButton(tweetElement) {
       }
     };
 
-    // 8-second safety timeout to prevent hanging UI
+    // 32-second safety timeout to prevent hanging UI
     const timeoutId = setTimeout(() => {
       if (!isReset) {
         resetBtn();
         alert("Analysis Timeout: The Flask backend did not respond in time. Please verify that 'python backend/src/app.py' is running on port 5000.");
       }
-    }, 8000);
+    }, 32000);
 
     // Check if extension context is valid (prevents TypeError when extension is reloaded in chrome://extensions)
     if (typeof chrome === "undefined" || !chrome || !chrome.runtime || typeof chrome.runtime.sendMessage !== "function") {
@@ -335,7 +335,7 @@ function renderDashboardModal(data) {
   modal.innerHTML = `
     <div class="mindpulse-modal-header" id="mindpulseModalHeader">
       <div class="mindpulse-header-brand">
-        <img src="${chrome.runtime.getURL('logo.png')}" class="mindpulse-brand-icon" style="object-fit: contain; transform: scale(1.7);" alt="MindPulse Logo" />
+        <img src="${chrome.runtime.getURL('logo.png')}" class="mindpulse-brand-icon" style="object-fit: contain; border-radius: 4px; margin-right: 2px;" alt="MindPulse Logo" />
         <span class="mindpulse-brand-title">MindPulse AI</span>
         <span class="mindpulse-brand-badge">Diagnostics Dashboard</span>
       </div>
